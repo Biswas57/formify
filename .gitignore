@@ -9,6 +9,7 @@ __pycache__/
 
 # Ignore environment files
 .env
+backend/.env
 
 # Ignore Node.js dependencies
 frontend/node_modules/
