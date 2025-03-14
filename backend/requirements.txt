@@ -1,0 +1,4 @@
+Django
+djongo
+pymongo
+django-cors-headers
