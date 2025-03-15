@@ -4,19 +4,30 @@ from django.contrib.auth.models import User
 
 class FormComposition(models.Model):
     """
-    A form created by a user that consists of multiple info blocks
+    A template for forms created by a user that can be used multiple times
     """
-    form_id = models.AutoField(primary_key=True)
-    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='forms')
+    form_composition_id = models.AutoField(primary_key=True)
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='form_compositions')
     name = models.CharField(max_length=255)
     has_id_short = models.BooleanField(default=False)
     has_address_info = models.BooleanField(default=False)
-
-    class Meta:
-        unique_together = ('form_id', 'owner')
+    has_notes = models.BooleanField(default=False)
 
     def __str__(self):
-        return f"{self.name} (Form #{self.form_id})"
+        return f"{self.name} (Composition #{self.form_composition_id})"
+
+
+class Form(models.Model):
+    """
+    An actual form instance based on a form composition
+    """
+    id = models.AutoField(primary_key=True)
+    form_composition = models.ForeignKey(FormComposition, on_delete=models.CASCADE, related_name='forms')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return f"Form #{self.id} - {self.form_composition.name}"
 
 
 class InfoBlock(models.Model):
@@ -30,7 +41,7 @@ class InfoBlock(models.Model):
     ]
     
     info_id = models.AutoField(primary_key=True)
-    form = models.ForeignKey(FormComposition, on_delete=models.CASCADE, related_name='info_blocks')
+    form = models.ForeignKey(Form, on_delete=models.CASCADE, related_name='info_blocks')
     info_type = models.CharField(max_length=20, choices=INFO_TYPE_CHOICES)
     order_id = models.IntegerField(help_text="Order of this block within the form")
     
