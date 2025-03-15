@@ -35,16 +35,15 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'daphne',
     'django.contrib.staticfiles',
     'corsheaders',
     'transcription',
     'parsing',
     'channels',
-    'daphne',
     'rest_framework.authtoken',  # Handles token-based authentication
     'api',
-    'corsheaders'
-
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
@@ -89,6 +88,8 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'backend.wsgi.application'
+
+# daphne -b 0.0.0.0 -p 8000 backend.asgi:application
 ASGI_APPLICATION = 'backend.asgi.application'
 
 # Define WebSocket layer (for later scaling, use Redis instead of InMemory)
