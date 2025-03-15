@@ -37,7 +37,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'api'
+    'rest_framework.authtoken',  # Handles token-based authentication
+    'api',
+    'corsheaders'
+
 ]
 
 MIDDLEWARE = [
@@ -48,7 +51,20 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "corsheaders.middleware.CorsMiddleware",  
+    "django.middleware.common.CommonMiddleware",
 ]
+
+
+REST_FRAMEWORK = {
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticated",  # Requires authentication by default
+    ],
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.TokenAuthentication",  # Uses token-based authentication
+    ],
+}
+
 
 ROOT_URLCONF = 'backend.urls'
 
@@ -98,6 +114,21 @@ AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
+]
+
+# ✅ Allow React frontend to access the backend
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",  # Allow frontend
+]
+
+# ✅ Enable support for credentials (cookies, tokens)
+CORS_ALLOW_CREDENTIALS = True
+
+# ✅ Explicitly allow authentication headers
+CORS_ALLOW_HEADERS = [
+    "authorization",
+    "content-type",
+    "x-csrftoken",
 ]
 
 
