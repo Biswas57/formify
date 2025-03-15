@@ -14,8 +14,7 @@ export default function FormCreate() {
   const [formName, setFormName] = useState("");
   const [formBlocks, setFormBlocks] = useState([]);
 
-  // You can choose to display all block types as templates,
-  // or define a custom list:
+  // Generate a list of template blocks based on the blocksConfig
   const templateBlocks = Object.keys(blocksConfig).map((type, index) => ({
     id: `template-${index + 1}`,
     type,
@@ -178,7 +177,6 @@ export default function FormCreate() {
             <h2 className="text-xl font-semibold mb-4 pb-2 border-b">
               Template Blocks
             </h2>
-
             <div className="space-y-3">
               {templateBlocks.map((block) => (
                 <div
@@ -209,6 +207,32 @@ export default function FormCreate() {
                 </div>
               ))}
             </div>
+                          {/* Custom Block Button */}
+                          <div className="mt-4 mb-4">
+                <button
+                    className="w-full border border-blue-600 font-bold text-blue-600 py-2 px-4 rounded flex items-center justify-center cursor-pointer transition-transform duration-200 transform-gpu hover:scale-102"                  
+                    onClick={() =>
+                    alert("Custom block creation coming soon!")
+                  }
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 mr-2"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 4v16m8-8H4"
+                    />
+                  </svg>
+                  Create Custom Block
+                </button>
+              </div>
+
           </div>
         </div>
       </div>

@@ -11,7 +11,6 @@ export const blocksConfig = {
     label: "Medical",
     fields: ["Allergies", "Current Medications", "Medical History"],
   },
-  // Add new block types as needed:
   MedicalProfessional: {
     label: "Medical Professional",
     fields: ["Name", "License Number", "Specialization", "Years of Experience"],
@@ -19,6 +18,25 @@ export const blocksConfig = {
   Education: {
     label: "Education",
     fields: ["School Name", "Degree", "Major", "Graduation Year"],
+  },
+  SocialMedia: {
+    label: "Social Media",
+    fields: [
+      "Platform",
+      "Username",
+      "Profile URL",
+      "Follower Count",
+    ],
+  },
+  Financial: {
+    label: "Financial",
+    fields: [
+      "Bank Name",
+      "Account Number",
+      "Routing Number",
+      "Credit Score",
+      "Annual Income",
+    ],
   },
   // etc.
 };
