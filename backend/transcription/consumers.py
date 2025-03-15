@@ -15,8 +15,10 @@ class TranscriptionConsumer(AsyncWebsocketConsumer):
         self.audio_buffer = b""
 
     async def disconnect(self, close_code):
-        # payload = self.audio_buffer + b'\x00' * (MIN_AUDIO_CHUNK_SIZE - len(self.audio_buffer) + 1)
-        # self.receive(payload)
+        transcription = await self.run_whisper_on_buffer(self.audio_buffer)
+        await self.send(text_data=json.dumps({
+            "transcription": transcription
+        }))
         pass
 
     async def receive(self, bytes_data=None, text_data=None):

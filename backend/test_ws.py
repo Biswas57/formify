@@ -12,7 +12,7 @@ async def test_ws():
         print("Sending audio file...")
         await websocket.send(audio_data)  # Send valid WAV audio
 
-        # Wait for a response
+        # Wait for a response from the server.
         response = await websocket.recv()
         print("Received:", response)
 
