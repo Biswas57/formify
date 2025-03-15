@@ -41,6 +41,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'corsheaders',
+    'transcription',
+    'channels',
 ]
 
 MIDDLEWARE = [
@@ -89,7 +91,7 @@ DATABASES = {
         'NAME': 'Formify',  # Database name from MongoDB Atlas
         'CLIENT': {
             'host': os.getenv("MONGO_URL"),
-            'tls': True,  # Enable TLS for secure connection
+            'tls': True,
         }
     }
 }

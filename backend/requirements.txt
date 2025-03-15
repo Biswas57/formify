@@ -8,3 +8,9 @@ pymongo==3.11.4
 python-dotenv==1.0.1
 pytz==2025.1
 sqlparse==0.2.4
+channels
+websockets
+pydantic
+openai
+whisper
+groq
