@@ -1,8 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-
-import { useState } from "react";
 import { Link } from "react-router-dom";
 
 export default function Login() {
@@ -50,18 +48,6 @@ export default function Login() {
     }
   };
 
-  const [form, setForm] = useState({ email: "", password: "" });
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm({ ...form, [name]: value });
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("Login attempt:", form);
-    // Handle login logic here
-  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
