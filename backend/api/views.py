@@ -20,7 +20,6 @@ class RegisterUserView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-
 class LoginView(APIView):
     permission_classes = [AllowAny]  # Allow unauthenticated users to log in
 

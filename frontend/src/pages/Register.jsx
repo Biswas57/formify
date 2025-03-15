@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Link } from "react-router-dom";
@@ -7,6 +7,16 @@ export default function Register() {
   const [form, setForm] = useState({ fullName: "", email: "", password: "", confirmPassword: "" });
   const [error, setError] = useState("");
   const navigate = useNavigate();
+
+  // Redirect to dashboard if already authenticated
+  useEffect(() => {
+    const authToken = document.cookie
+      .split(";")
+      .find((cookie) => cookie.trim().startsWith("auth_token="));
+    if (authToken) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [navigate]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -38,20 +48,16 @@ export default function Register() {
       );
 
       if (response.status === 201) {
-        document.cookie = `auth_token=${response.data.token}; path=/`; // Store token in a cookie
-        navigate("/dashboard"); // Redirect to dashboard
+        document.cookie = `auth_token=${response.data.token}; path=/`;
+        navigate("/dashboard");
       }
     } catch (err) {
       console.error("Register error:", err);
       if (err.response) {
-        console.error("Response data:", err.response.data);
-        console.error("Status code:", err.response.status);
         setError(err.response.data.error || "An error occurred.");
       } else if (err.request) {
-        console.error("No response received:", err.request);
         setError("No response from server. Is the backend running?");
       } else {
-        console.error("Request error:", err.message);
         setError("Something went wrong. Please try again.");
       }
     }

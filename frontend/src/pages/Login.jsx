@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Link } from "react-router-dom";
@@ -7,6 +7,16 @@ export default function Login() {
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
   const navigate = useNavigate();
+
+  // Redirect to dashboard if already authenticated
+  useEffect(() => {
+    const authToken = document.cookie
+      .split(";")
+      .find((cookie) => cookie.trim().startsWith("auth_token="));
+    if (authToken) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [navigate]);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -19,7 +29,7 @@ export default function Login() {
     try {
       const response = await axios.post(
         "http://127.0.0.1:8000/api/auth/login/",
-        JSON.stringify(form),  // Ensure JSON body
+        JSON.stringify(form),
         {
           headers: {
             "Content-Type": "application/json",
@@ -29,25 +39,20 @@ export default function Login() {
       );
       
       if (response.status === 200) {
-        document.cookie = `auth_token=${response.data.token}; path=/`; // Store token in a cookie
-        navigate("/dashboard"); // Redirect to dashboard
+        document.cookie = `auth_token=${response.data.token}; path=/`;
+        navigate("/dashboard");
       }
     } catch (err) {
       console.error("Login error:", err);
       if (err.response) {
-        console.error("Response data:", err.response.data);
-        console.error("Status code:", err.response.status);
         setError(err.response.data.error || "An error occurred.");
       } else if (err.request) {
-        console.error("No response received:", err.request);
         setError("No response from server. Is the backend running?");
       } else {
-        console.error("Request error:", err.message);
         setError("Something went wrong. Please try again.");
       }
     }
   };
-
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
@@ -103,21 +108,6 @@ export default function Login() {
               </div>
             </div>
 
-            {/* <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <input
-                  id="remember-me"
-                  name="remember-me"
-                  type="checkbox"
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                />
-                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
-                  Remember me
-                </label>
-              </div>
-
-            </div> */}
-
             <div>
               <button
                 type="submit"
@@ -127,8 +117,8 @@ export default function Login() {
               </button>
             </div>
           </form>
+          {error && <p className="text-red-500 text-sm mt-4">{error}</p>}
         </div>
-        
       </div>
     </div>
   );
