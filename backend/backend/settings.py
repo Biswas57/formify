@@ -40,16 +40,11 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'daphne',
     'django.contrib.staticfiles',
-    'corsheaders',
-    'transcription',
-    'parsing',
     'channels',
     'rest_framework.authtoken',  # Handles token-based authentication
     'api',
     'corsheaders',
-    'channels',
 ]
 
 MIDDLEWARE = [
@@ -94,7 +89,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'backend.wsgi.application'
-ASGI_APPLICATION = 'your_project.asgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
