@@ -1,6 +1,47 @@
 from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
+from .models import Form, Block, Field
+
+class FieldSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Field
+        fields = ['id', 'field_name', 'field_type']
+
+class BlockSerializer(serializers.ModelSerializer):
+    fields = FieldSerializer(many=True)  # Include nested fields
+
+    class Meta:
+        model = Block
+        fields = ["id", "block_name", "fields"]
+        
+class FormDetailSerializer(serializers.ModelSerializer):
+    blocks = BlockSerializer(many=True, read_only=True)
+    
+    class Meta:
+        model = Form
+        fields = ['id', 'form_name', 'blocks']
+
+class FormSerializer(serializers.ModelSerializer):
+    blocks = BlockSerializer(many=True)  # Include nested blocks
+
+    class Meta:
+        model = Form
+        fields = ["id", "form_name", "blocks"]
+
+    def create(self, validated_data):
+        """Override create() to handle nested data"""
+        blocks_data = validated_data.pop("blocks")
+        form = Form.objects.create(**validated_data)
+
+        for block_data in blocks_data:
+            fields_data = block_data.pop("fields")
+            block = Block.objects.create(form=form, **block_data)
+
+            for field_data in fields_data:
+                Field.objects.create(block=block, **field_data)
+
+        return form
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True, validators=[validate_password])

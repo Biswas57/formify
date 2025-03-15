@@ -2,16 +2,16 @@ import { motion, AnimatePresence } from "framer-motion";
 import { blocksConfig } from "../blocksConfig";
 
 // Helper to render an input field based on the field name
-const renderField = (field) => {
-  if (["Medical History", "Allergies", "Current Medications"].includes(field)) {
+const renderField = (fieldName) => {
+  if (["Medical History", "Allergies", "Current Medications"].includes(fieldName)) {
     return (
       <textarea
         className="w-full p-2 border border-gray-300 rounded-md"
         rows="3"
-        placeholder={`Enter ${field}...`}
+        placeholder={`Enter ${fieldName}...`}
       />
     );
-  } else if (field === "Date of Birth") {
+  } else if (fieldName === "Date of Birth") {
     return (
       <input
         type="date"
@@ -23,7 +23,7 @@ const renderField = (field) => {
       <input
         type="text"
         className="w-full p-2 border border-gray-300 rounded-md"
-        placeholder={`Enter ${field}...`}
+        placeholder={`Enter ${fieldName}...`}
       />
     );
   }
@@ -36,9 +36,12 @@ export default function FormPreview({ blocks }) {
 
       <AnimatePresence>
         {blocks.map((block) => {
-          // Get the configuration for this block type. Fallback to a default if not found.
+          // Use block.block_name to look up configuration in blocksConfig.
+          // Fallback to block.type or a default configuration.
           const blockConfig =
-            blocksConfig[block.type] || { label: block.type, fields: ["Field 1", "Field 2"] };
+            blocksConfig[block.block_name] ||
+            blocksConfig[block.type] ||
+            { label: block.type, fields: ["Field 1", "Field 2"] };
 
           return (
             <motion.div
@@ -51,17 +54,22 @@ export default function FormPreview({ blocks }) {
               className="mb-6 p-4 border border-gray-300 rounded-lg bg-gray-50"
             >
               <h3 className="text-lg font-semibold text-gray-800">
-                {blockConfig.label}
+                {blockConfig.label || block.block_name || block.type}
               </h3>
 
-              {blockConfig.fields.map((field, idx) => (
-                <div key={idx} className="mt-2">
-                  <label className="block text-sm font-medium text-gray-700">
-                    {field}
-                  </label>
-                  {renderField(field)}
-                </div>
-              ))}
+              {blockConfig.fields.map((field, idx) => {
+                // Determine field name: if field is an object, use its field_name property; otherwise use the string directly.
+                const fieldName =
+                  typeof field === "object" && field.field_name ? field.field_name : field;
+                return (
+                  <div key={idx} className="mt-2">
+                    <label className="block text-sm font-medium text-gray-700">
+                      {fieldName}
+                    </label>
+                    {renderField(fieldName)}
+                  </div>
+                );
+              })}
             </motion.div>
           );
         })}
