@@ -132,7 +132,7 @@ Attributes to find: {templateAttributes}
 # --------------------
 # 4) Orchestrator: Steps 2–6
 # --------------------
-def parseTranscribedText(transcribedText: str, templateAttributes: List[str]) -> Dict[str, Any]:
+def parseTranscribedText(transcribedText: str, templateAttributes: List[str]):
     """
     High-level function that:
     (1) Revises the transcription (Step 2.5).
@@ -148,8 +148,9 @@ def parseTranscribedText(transcribedText: str, templateAttributes: List[str]) ->
     parsedAttributes, _ = extractAttributesFromText(correctedText, templateAttributes)
     
     # Step 6: Return final JSON.
-    return {
-        "correctedText": correctedText,
-        "attributes": parsedAttributes
-    }
+    return correctedText, parsedAttributes
+    # return {
+    #     "correctedText": correctedText,
+    #     "attributes": parsedAttributes
+    # }
 

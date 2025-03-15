@@ -3,11 +3,14 @@ import websockets
 
 async def test_ws():
     uri = "ws://localhost:8000/ws/transcription/"
+
+    # Read an actual WAV file
+    with open("New Recording 6.m4a", "rb") as f:
+        audio_data = f.read()
+
     async with websockets.connect(uri) as websocket:
-        # Send dummy binary data
-        # For testing, ensure the amount of data is at least MIN_AUDIO_CHUNK_SIZE bytes.
-        dummy_data = b'\x00' * 60000  # 60 KB of zero bytes
-        await websocket.send(dummy_data)
+        print("Sending audio file...")
+        await websocket.send(audio_data)  # Send valid WAV audio
 
         # Wait for a response
         response = await websocket.recv()

@@ -1,5 +1,6 @@
 import json, tempfile, asyncio
 from channels.generic.websocket import AsyncWebsocketConsumer
+from parsing.groq_parse import parseTranscribedText
 import whisper
 
 # Load the Whisper model (choose the appropriate model size for your needs)
@@ -14,8 +15,8 @@ class TranscriptionConsumer(AsyncWebsocketConsumer):
         self.audio_buffer = b""
 
     async def disconnect(self, close_code):
-        payload = self.audio_buffer + '\x00' * (MIN_AUDIO_CHUNK_SIZE - len(self.audio_buffer) + 1)
-        self.receive(payload)
+        # payload = self.audio_buffer + b'\x00' * (MIN_AUDIO_CHUNK_SIZE - len(self.audio_buffer) + 1)
+        # self.receive(payload)
         pass
 
     async def receive(self, bytes_data=None, text_data=None):
@@ -24,8 +25,12 @@ class TranscriptionConsumer(AsyncWebsocketConsumer):
             # When enough audio data has accumulated, process it
             if len(self.audio_buffer) >= MIN_AUDIO_CHUNK_SIZE:
                 transcription = await self.run_whisper_on_buffer(self.audio_buffer)
+                attributes = ["name", "to my left"]
+
+                fixed_audio, attribute_final = parseTranscribedText(transcription, attributes)
                 await self.send(text_data=json.dumps({
-                    "transcription": transcription
+                    "correct_audio": fixed_audio,
+                    "attributes" : attribute_final
                 }))
                 # Reset or adjust the buffer as needed (e.g., clear or overlap)
                 self.audio_buffer = b""
