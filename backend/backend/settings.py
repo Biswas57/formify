@@ -82,10 +82,15 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'djongo',
+        'NAME': 'Formify',  # Database name from MongoDB Atlas
+        'CLIENT': {
+            'host': os.getenv("MONGO_URL"),
+            'tls': True,  # Enable TLS for secure connection
+        }
     }
 }
 
