@@ -16,7 +16,8 @@ class TranscriptionConsumer(AsyncWebsocketConsumer):
         self.template = []
 
     async def disconnect(self, close_code):
-        await self.process_transcription()
+        # await self.process_transcription()
+        # deal with remaining audio bytes
         pass
 
     async def receive(self, bytes_data=None, template_id=None):
@@ -28,17 +29,17 @@ class TranscriptionConsumer(AsyncWebsocketConsumer):
             self.audio_buffer += bytes_data
             # When enough audio data has accumulated, process it
             if len(self.audio_buffer) >= MIN_AUDIO_CHUNK_SIZE:
-                self.process_transcription()
+
+                transcription = await self.run_whisper_on_buffer(self.audio_buffer)
+                fixed_audio, attribute_final = parseTranscribedText(transcription, self.template)
+
+                await self.send(text_data=json.dumps({
+                    "corrected_audio": fixed_audio,
+                    "attributes" : attribute_final
+                }))
+
                 # Reset or adjust the buffer as needed (e.g., clear or overlap)
                 self.audio_buffer = b""
-    
-    async def process_transcription(self):
-        transcription = await self.run_whisper_on_buffer(self.audio_buffer)
-        fixed_audio, attribute_final = parseTranscribedText(transcription, self.template)
-        await self.send(text_data=json.dumps({
-            "corrected_audio": fixed_audio,
-            "attributes" : attribute_final
-        }))
 
     async def run_whisper_on_buffer(self, audio_data):
         with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp:
