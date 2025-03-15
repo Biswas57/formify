@@ -1,30 +1,36 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { blocksConfig } from "../blocksConfig";
 
-// Helper to render an input field based on the field name
+// Helper to render a preview field based on the field name
 const renderField = (field) => {
+  const baseStyles = "w-full p-2 bg-gray-50 border border-dashed border-gray-300 rounded-md text-gray-400 cursor-not-allowed select-none";
+  
   if (["Medical History", "Allergies", "Current Medications"].includes(field)) {
     return (
-      <textarea
-        className="w-full p-2 border border-gray-300 rounded-md"
-        rows="3"
-        placeholder={`Enter ${field}...`}
-      />
+      <div 
+        className={`${baseStyles} h-24`}
+        aria-label={`Preview area for ${field}`}
+      >
+        {field} text area
+      </div>
     );
   } else if (field === "Date of Birth") {
     return (
-      <input
-        type="date"
-        className="w-full p-2 border border-gray-300 rounded-md"
-      />
+      <div 
+        className={baseStyles}
+        aria-label="Preview area for date input"
+      >
+        Date picker
+      </div>
     );
   } else {
     return (
-      <input
-        type="text"
-        className="w-full p-2 border border-gray-300 rounded-md"
-        placeholder={`Enter ${field}...`}
-      />
+      <div 
+        className={baseStyles}
+        aria-label={`Preview area for ${field}`}
+      >
+        {field} input field
+      </div>
     );
   }
 };
@@ -32,7 +38,10 @@ const renderField = (field) => {
 export default function FormPreview({ blocks }) {
   return (
     <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
-      <h2 className="text-xl font-semibold mb-6 pb-4 border-b">Form Preview</h2>
+      <div className="flex items-center justify-between mb-6 pb-4 border-b">
+        <h2 className="text-xl font-semibold">Form Preview</h2>
+        <span className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">Preview Mode</span>
+      </div>
 
       <AnimatePresence>
         {blocks.map((block) => {
@@ -48,15 +57,15 @@ export default function FormPreview({ blocks }) {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -10, scale: 0.95 }}
               transition={{ type: "spring", stiffness: 200, damping: 15 }}
-              className="mb-6 p-4 border border-gray-300 rounded-lg bg-gray-50"
+              className="mb-6 p-4 border border-gray-300 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
             >
-              <h3 className="text-lg font-semibold text-gray-800">
+              <h3 className="text-lg font-semibold text-gray-800 mb-3">
                 {blockConfig.label}
               </h3>
 
               {blockConfig.fields.map((field, idx) => (
-                <div key={idx} className="mt-2">
-                  <label className="block text-sm font-medium text-gray-700">
+                <div key={idx} className="mt-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     {field}
                   </label>
                   {renderField(field)}
@@ -84,6 +93,7 @@ export default function FormPreview({ blocks }) {
             />
           </svg>
           <p>Drag and drop form blocks to start building your form</p>
+          <p className="text-sm mt-2 text-gray-500">This is a preview of the form structure. It cannot be edited.</p>
         </div>
       )}
     </div>
