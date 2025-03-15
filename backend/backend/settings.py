@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'transcription',
     'channels',
+    'daphne',
 ]
 
 MIDDLEWARE = [
@@ -80,6 +81,14 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'backend.wsgi.application'
 
+ASGI_APPLICATION = "backend.asgi.application"
+
+# Define WebSocket layer (for later scaling, use Redis instead of InMemory)
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    }
+}
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases

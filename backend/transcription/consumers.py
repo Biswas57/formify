@@ -6,7 +6,7 @@ import whisper
 model = whisper.load_model("base")
 
 # Adjust this threshold based on testing and your audio format (in bytes)
-MIN_AUDIO_CHUNK_SIZE = 50000  
+MIN_AUDIO_CHUNK_SIZE = 50000
 
 class TranscriptionConsumer(AsyncWebsocketConsumer):
     async def connect(self):
