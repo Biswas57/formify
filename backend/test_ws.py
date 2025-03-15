@@ -4,12 +4,14 @@ import websockets
 async def test_ws():
     uri = "ws://localhost:8000/ws/transcription/"
     async with websockets.connect(uri) as websocket:
-        # Send dummy binary data
-        # For testing, ensure the amount of data is at least MIN_AUDIO_CHUNK_SIZE bytes.
-        dummy_data = b'\x00' * 60000  # 60 KB of zero bytes
-        await websocket.send(dummy_data)
+        # Open the WAV file in binary mode and read its contents into bytes.
+        with open("example.wav", "rb") as wav_file:
+            file_bytes = wav_file.read()
+        
+        # Send the file bytes over the WebSocket.
+        await websocket.send(file_bytes)
 
-        # Wait for a response
+        # Wait for a response from the server.
         response = await websocket.recv()
         print("Received:", response)
 

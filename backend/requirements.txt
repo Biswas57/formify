@@ -12,5 +12,7 @@ channels
 websockets
 pydantic
 openai
-whisper
+openai-whisper
 groq
+ffmpeg
+daphne
