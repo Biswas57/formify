@@ -11,6 +11,11 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -35,15 +40,11 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'daphne',
     'django.contrib.staticfiles',
-    'corsheaders',
-    'transcription',
-    'parsing',
     'channels',
     'rest_framework.authtoken',  # Handles token-based authentication
     'api',
-    'rest_framework',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
@@ -88,16 +89,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'backend.wsgi.application'
-
-# daphne -b 0.0.0.0 -p 8000 backend.asgi:application
-ASGI_APPLICATION = 'backend.asgi.application'
-
-# Define WebSocket layer (for later scaling, use Redis instead of InMemory)
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer"
-    }
-}
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases

@@ -1,43 +1,42 @@
+import { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 
+function getCookie(name) {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(";").shift();
+}
+
 export default function MyForms() {
-  const forms = [
-    {
-      id: 1,
-      name: "Patient Registration",
-      created: "Mar 10, 2025",
-      submissions: 12,
-      lastSubmission: "2h ago",
-    },
-    {
-      id: 2,
-      name: "Contact Information",
-      created: "Mar 5, 2025",
-      submissions: 8,
-      lastSubmission: "1d ago",
-    },
-    {
-      id: 3,
-      name: "Medical History",
-      created: "Feb 28, 2025",
-      submissions: 4,
-      lastSubmission: "3d ago",
-    },
-    {
-      id: 4,
-      name: "Feedback Survey",
-      created: "Feb 20, 2025",
-      submissions: 0,
-      lastSubmission: "Never",
-    },
-    {
-      id: 5,
-      name: "Event Registration",
-      created: "Feb 15, 2025",
-      submissions: 0,
-      lastSubmission: "Never",
-    },
-  ];
+  const [forms, setForms] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchForms = async () => {
+      try {
+        const response = await fetch("http://127.0.0.1:8000/api/auth/forms/list/", {
+          method: "GET",
+          headers: {
+            "Authorization": `Token ${getCookie("auth_token")}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch forms");
+        }
+
+        const data = await response.json();
+        setForms(data);
+      } catch (error) {
+        console.error("Error fetching forms:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchForms();
+  }, []);
 
   return (
     <div className="max-w-6xl">
@@ -54,12 +53,7 @@ export default function MyForms() {
             viewBox="0 0 24 24"
             stroke="currentColor"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 4v16m8-8H4"
-            />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
           </svg>
           Create Form
         </NavLink>
@@ -67,57 +61,51 @@ export default function MyForms() {
 
       <div className="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Form Name
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Created
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Submissions
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Last Submission
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {forms.map((form) => (
-                <tr key={form.id}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {form.name}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {form.created}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {form.submissions}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {form.lastSubmission}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 space-x-2">
-                    <NavLink
-                      to={`/dashboard/form/${form.id}`}
-                      className="text-blue-600 hover:text-blue-800"
-                    >
-                      View
-                    </NavLink>
-                    <span className="text-gray-300">|</span>
-                    <button className="text-red-600 hover:text-red-800">
-                      Delete
-                    </button>
-                  </td>
+          {loading ? (
+            <p className="text-center p-4">Loading...</p>
+          ) : (
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Form Name
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {forms.length === 0 ? (
+                  <tr>
+                    <td colSpan="2" className="text-center p-4 text-gray-500">
+                      No forms found
+                    </td>
+                  </tr>
+                ) : (
+                  forms.map((form) => (
+                    <tr key={form.id}>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        {form.form_name}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 space-x-2">
+                        <NavLink
+                          to={`/dashboard/form/${form.id}`}
+                          className="text-blue-600 hover:text-blue-800"
+                        >
+                          View
+                        </NavLink>
+                        <span className="text-gray-300">|</span>
+                        <button className="text-red-600 hover:text-red-800">
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
     </div>

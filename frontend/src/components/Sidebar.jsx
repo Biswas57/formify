@@ -1,6 +1,15 @@
-import { NavLink } from "react-router-dom";
+import { useNavigate, NavLink } from "react-router-dom";
 
 export default function Sidebar() {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    // Clear the auth token cookie by setting its expiration to a past date
+    document.cookie = "auth_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    // Redirect to login page
+    navigate("/login");
+  };
+
   return (
     <div className="w-64 bg-white shadow-lg h-screen fixed top-0 left-0 p-6">
       <h1 className="text-2xl font-bold text-blue-600 mb-8">Formify</h1>
@@ -49,12 +58,12 @@ export default function Sidebar() {
         </div>
 
         <div className="absolute bottom-6 left-6 right-6">
-          <NavLink
-            to="/login"
+          <button
+            onClick={handleLogout}
             className="flex items-center p-3 text-gray-700 rounded-lg hover:bg-red-50 hover:text-red-600 transition-all"
           >
             Logout
-          </NavLink>
+          </button>
         </div>
       </nav>
     </div>

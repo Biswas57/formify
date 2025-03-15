@@ -10,11 +10,19 @@ import {
 } from "@dnd-kit/sortable";
 import { blocksConfig } from "../blocksConfig";
 
+// Helper to get a cookie value
+function getCookie(name) {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(";").shift();
+}
+
 export default function FormCreate() {
   const [formName, setFormName] = useState("");
   const [formBlocks, setFormBlocks] = useState([]);
+  const [saving, setSaving] = useState(false);
 
-  // Generate a list of template blocks based on the blocksConfig
+  // Generate a list of template blocks based on the keys in blocksConfig
   const templateBlocks = Object.keys(blocksConfig).map((type, index) => ({
     id: `template-${index + 1}`,
     type,
@@ -22,9 +30,38 @@ export default function FormCreate() {
 
   // Add a template block into the form
   const handleAddBlock = (blockType) => {
+    // Log to see what we get from blocksConfig for the given blockType
+    console.log("Adding block for type:", blockType, blocksConfig[blockType]);
+    
+    // Check if the value is an object with a fields property
+    let fieldsArray;
+    if (blocksConfig[blockType] && Array.isArray(blocksConfig[blockType].fields)) {
+      fieldsArray = blocksConfig[blockType].fields;
+    } else if (Array.isArray(blocksConfig[blockType])) {
+      fieldsArray = blocksConfig[blockType];
+    } else {
+      console.error(
+        "Expected an array or an object with a fields array for blocksConfig[blockType] but got:",
+        blocksConfig[blockType]
+      );
+      return;
+    }
+    
+    // Convert each field to an object.
+    // If the field is a string, assign default field_type "TEXT".
+    // If it's already an object, use its properties.
+    const processedFields = fieldsArray.map((field) => {
+      if (typeof field === "string") {
+        return { field_name: field, field_type: "TEXT" };
+      } else {
+        return { field_name: field.name, field_type: field.type };
+      }
+    });
+    
     const newBlock = {
       id: `block-${formBlocks.length + 1}`,
       type: blockType,
+      fields: processedFields,
     };
     setFormBlocks([...formBlocks, newBlock]);
   };
@@ -46,14 +83,50 @@ export default function FormCreate() {
     setFormBlocks(newBlocks);
   };
 
-  // Save the form
-  const handleSave = () => {
-    const form = {
-      name: formName || "Untitled Form",
-      blocks: formBlocks,
+  // Save the form by sending a POST request to the backend
+  const handleSave = async () => {
+    if (!formName.trim()) {
+      alert("Please enter a form name.");
+      return;
+    }
+    setSaving(true);
+
+    // Prepare payload as expected by your backend serializer:
+    // { form_name: string, blocks: [ { block_name: string, fields: [{ field_name, field_type }] } ] }
+    const payload = {
+      form_name: formName,
+      blocks: formBlocks.map((block) => ({
+        block_name: block.type, // using the block type as its name
+        fields: block.fields,
+      })),
     };
-    console.log("Saving form:", form);
-    alert("Form saved successfully!");
+
+    try {
+      const response = await fetch("http://127.0.0.1:8000/api/auth/forms/create/", {
+        method: "POST",
+        headers: {
+          "Authorization": `Token ${getCookie("auth_token")}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to save form.");
+      }
+
+      const data = await response.json();
+      alert("Form saved successfully!");
+      console.log("Saved form:", data);
+      // Clear form state after a successful save.
+      setFormName("");
+      setFormBlocks([]);
+    } catch (error) {
+      console.error("Error saving form:", error);
+      alert("Error saving form. Please try again.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -63,7 +136,10 @@ export default function FormCreate() {
         <h1 className="text-3xl font-bold">Create New Form</h1>
         <button
           onClick={handleSave}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow-sm flex items-center transition-colors"
+          disabled={saving}
+          className={`bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow-sm flex items-center transition-colors ${
+            saving ? "opacity-50 cursor-not-allowed" : ""
+          }`}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -79,11 +155,11 @@ export default function FormCreate() {
               d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"
             />
           </svg>
-          Save Form
+          {saving ? "Saving..." : "Save Form"}
         </button>
       </div>
 
-      {/* Form Name */}
+      {/* Form Name Input */}
       <div className="mb-6">
         <label
           htmlFor="formName"
@@ -162,7 +238,7 @@ export default function FormCreate() {
                           type={block.type}
                           index={index}
                           removeBlock={() => removeBlock(index)}
-                          withDelete={false} // hide internal delete button
+                          withDelete={false} // hide internal delete button if needed
                         />
                       </SortableItem>
                     ))}
@@ -207,32 +283,31 @@ export default function FormCreate() {
                 </div>
               ))}
             </div>
-                          {/* Custom Block Button */}
-                          <div className="mt-4 mb-4">
-                <button
-                    className="w-full border border-blue-600 font-bold text-blue-600 py-2 px-4 rounded flex items-center justify-center cursor-pointer transition-transform duration-200 transform-gpu hover:scale-102"                  
-                    onClick={() =>
-                    alert("Custom block creation coming soon!")
-                  }
+            {/* Custom Block Button */}
+            <div className="mt-4 mb-4">
+              <button
+                className="w-full border border-blue-600 font-bold text-blue-600 py-2 px-4 rounded flex items-center justify-center cursor-pointer transition-transform duration-200 transform-gpu hover:scale-102"
+                onClick={() =>
+                  alert("Custom block creation coming soon!")
+                }
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5 mr-2"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5 mr-2"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 4v16m8-8H4"
-                    />
-                  </svg>
-                  Create Custom Block
-                </button>
-              </div>
-
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 4v16m8-8H4"
+                  />
+                </svg>
+                Create Custom Block
+              </button>
+            </div>
           </div>
         </div>
       </div>
