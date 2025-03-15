@@ -53,6 +53,7 @@ touch backend/backend/.env
 Add the following to `.env`:
 ```ini
 SECRET_KEY="your-secret-key-here"
+MONGO_URL="our Mongo url"
 ```
 
 ### **1.5 Ensure MongoDB is Running**
