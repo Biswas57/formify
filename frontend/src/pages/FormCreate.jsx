@@ -1,8 +1,10 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import FormBlock from '../components/FormBlock';
 import FormPreview from '../components/FormPreview';
 
 export default function FormCreate() {
+  const navigate = useNavigate();
   const [formName, setFormName] = useState('');
   const [formBlocks, setFormBlocks] = useState([]);
   const [draggedBlock, setDraggedBlock] = useState(null);
@@ -45,15 +47,37 @@ export default function FormCreate() {
   };
   
   // Handle saving the form
-  const handleSave = () => {
+  const handleSave = async () => {
     const form = {
       name: formName || 'Untitled Form',
       blocks: formBlocks
     };
     
-    console.log('Saving form:', form);
-    // In a real application, this would make an API call to save the form
-    alert('Form saved successfully!');
+    try {
+      // TODO: Replace with your actual API endpoint
+      const response = await fetch('http://localhost:8000/api/forms', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          // TODO: Add authentication token if needed
+          // 'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(form)
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to save form');
+      }
+
+      const savedForm = await response.json();
+      console.log('Form saved successfully:', savedForm);
+      
+      // Navigate to MyForms page after successful save
+      navigate('/dashboard/myforms');
+    } catch (error) {
+      console.error('Error saving form:', error);
+      alert('Failed to save form. Please try again.');
+    }
   };
   
   // Simulate drag and drop
