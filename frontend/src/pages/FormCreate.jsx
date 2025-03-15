@@ -1,24 +1,25 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import FormBlock from "../components/FormBlock";
 import FormPreview from "../components/FormPreview";
-import SortableItem from "../components/SortableItem"; // adjust the import path as needed
+import SortableItem from "../components/SortableItem";
 import { DndContext, closestCenter } from "@dnd-kit/core";
 import {
   SortableContext,
   verticalListSortingStrategy,
   arrayMove,
 } from "@dnd-kit/sortable";
+import { blocksConfig } from "../blocksConfig";
 
 export default function FormCreate() {
   const [formName, setFormName] = useState("");
   const [formBlocks, setFormBlocks] = useState([]);
 
-  // Sample template blocks
-  const templateBlocks = [
-    { id: "template-1", type: "ID" },
-    { id: "template-2", type: "IDExtended" },
-    { id: "template-3", type: "Medical" },
-  ];
+  // You can choose to display all block types as templates,
+  // or define a custom list:
+  const templateBlocks = Object.keys(blocksConfig).map((type, index) => ({
+    id: `template-${index + 1}`,
+    type,
+  }));
 
   // Add a template block into the form
   const handleAddBlock = (blockType) => {
@@ -41,7 +42,6 @@ export default function FormCreate() {
 
   // Remove a block
   const removeBlock = (index) => {
-    console.log("Removing block at index:", index);
     const newBlocks = [...formBlocks];
     newBlocks.splice(index, 1);
     setFormBlocks(newBlocks);
@@ -186,11 +186,7 @@ export default function FormCreate() {
                   className="cursor-pointer relative group"
                   onClick={() => handleAddBlock(block.type)}
                 >
-                  <FormBlock
-                    id={block.id}
-                    type={block.type}
-                    isTemplate={true}
-                  />
+                  <FormBlock id={block.id} type={block.type} isTemplate={true} />
                   {/* Gradient overlay on hover */}
                   <div className="absolute inset-0 bg-gradient-to-r from-blue-50 to-blue-100 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
                   {/* Plus icon overlay on hover */}

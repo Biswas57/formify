@@ -1,68 +1,70 @@
 import { motion, AnimatePresence } from "framer-motion";
+import { blocksConfig } from "../blocksConfig";
+
+// Helper to render an input field based on the field name
+const renderField = (field) => {
+  if (["Medical History", "Allergies", "Current Medications"].includes(field)) {
+    return (
+      <textarea
+        className="w-full p-2 border border-gray-300 rounded-md"
+        rows="3"
+        placeholder={`Enter ${field}...`}
+      />
+    );
+  } else if (field === "Date of Birth") {
+    return (
+      <input
+        type="date"
+        className="w-full p-2 border border-gray-300 rounded-md"
+      />
+    );
+  } else {
+    return (
+      <input
+        type="text"
+        className="w-full p-2 border border-gray-300 rounded-md"
+        placeholder={`Enter ${field}...`}
+      />
+    );
+  }
+};
 
 export default function FormPreview({ blocks }) {
-  // Define fields for each type
-  const fieldDefinitions = {
-    ID: ["Full Name", "Phone Number", "Email"],
-    IDExtended: [
-      "Full Name",
-      "Phone Number",
-      "Email",
-      "Address",
-      "Date of Birth",
-    ],
-    Medical: ["Allergies", "Current Medications", "Medical History"],
-  };
-
   return (
     <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
       <h2 className="text-xl font-semibold mb-6 pb-4 border-b">Form Preview</h2>
 
       <AnimatePresence>
-        {blocks.map((block, index) => (
-          <motion.div
-            key={block.id}
-            layout
-            initial={{ opacity: 0, y: 10, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -10, scale: 0.95 }}
-            transition={{ type: "spring", stiffness: 200, damping: 15 }}
-            className="mb-6 p-4 border border-gray-300 rounded-lg bg-gray-50"
-          >
-            <h3 className="text-lg font-semibold text-gray-800">
-              {block.type}
-            </h3>
+        {blocks.map((block) => {
+          // Get the configuration for this block type. Fallback to a default if not found.
+          const blockConfig =
+            blocksConfig[block.type] || { label: block.type, fields: ["Field 1", "Field 2"] };
 
-            {/* Dynamically Render Fields */}
-            {fieldDefinitions[block.type]?.map((field, idx) => (
-              <div key={idx} className="mt-2">
-                <label className="block text-sm font-medium text-gray-700">
-                  {field}
-                </label>
-                {field === "Medical History" ||
-                field === "Allergies" ||
-                field === "Current Medications" ? (
-                  <textarea
-                    className="w-full p-2 border border-gray-300 rounded-md"
-                    rows="3"
-                    placeholder={`Enter ${field}...`}
-                  ></textarea>
-                ) : field === "Date of Birth" ? (
-                  <input
-                    type="date"
-                    className="w-full p-2 border border-gray-300 rounded-md"
-                  />
-                ) : (
-                  <input
-                    type="text"
-                    className="w-full p-2 border border-gray-300 rounded-md"
-                    placeholder={`Enter ${field}...`}
-                  />
-                )}
-              </div>
-            ))}
-          </motion.div>
-        ))}
+          return (
+            <motion.div
+              key={block.id}
+              layout
+              initial={{ opacity: 0, y: 10, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -10, scale: 0.95 }}
+              transition={{ type: "spring", stiffness: 200, damping: 15 }}
+              className="mb-6 p-4 border border-gray-300 rounded-lg bg-gray-50"
+            >
+              <h3 className="text-lg font-semibold text-gray-800">
+                {blockConfig.label}
+              </h3>
+
+              {blockConfig.fields.map((field, idx) => (
+                <div key={idx} className="mt-2">
+                  <label className="block text-sm font-medium text-gray-700">
+                    {field}
+                  </label>
+                  {renderField(field)}
+                </div>
+              ))}
+            </motion.div>
+          );
+        })}
       </AnimatePresence>
 
       {blocks.length === 0 && (
