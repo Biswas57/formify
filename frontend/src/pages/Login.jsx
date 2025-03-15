@@ -1,19 +1,53 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import { Link } from "react-router-dom";
 
 export default function Login() {
   const [form, setForm] = useState({ email: "", password: "" });
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm({ ...form, [name]: value });
+    setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Login attempt:", form);
-    // Handle login logic here
+    setError("");
+
+    try {
+      const response = await axios.post(
+        "http://127.0.0.1:8000/api/auth/login/",
+        JSON.stringify(form),  // Ensure JSON body
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          withCredentials: true,
+        }
+      );
+      
+      if (response.status === 200) {
+        document.cookie = `auth_token=${response.data.token}; path=/`; // Store token in a cookie
+        navigate("/dashboard"); // Redirect to dashboard
+      }
+    } catch (err) {
+      console.error("Login error:", err);
+      if (err.response) {
+        console.error("Response data:", err.response.data);
+        console.error("Status code:", err.response.status);
+        setError(err.response.data.error || "An error occurred.");
+      } else if (err.request) {
+        console.error("No response received:", err.request);
+        setError("No response from server. Is the backend running?");
+      } else {
+        console.error("Request error:", err.message);
+        setError("Something went wrong. Please try again.");
+      }
+    }
   };
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">

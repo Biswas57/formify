@@ -1,23 +1,60 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import { Link } from "react-router-dom";
 
 export default function Register() {
-  const [form, setForm] = useState({ 
-    fullName: "", 
-    email: "", 
-    password: "", 
-    confirmPassword: "" 
-  });
+  const [form, setForm] = useState({ fullName: "", email: "", password: "", confirmPassword: "" });
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm({ ...form, [name]: value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Registration attempt:", form);
-    // Handle registration logic here
+    setError("");
+
+    if (form.password !== form.confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        "http://127.0.0.1:8000/api/auth/register/",
+        JSON.stringify({
+          email: form.email,
+          username: form.fullName, // Save full name as username
+          password: form.password,
+          password2: form.confirmPassword,
+        }),
+        {
+          headers: { "Content-Type": "application/json" },
+          withCredentials: true,
+        }
+      );
+
+      if (response.status === 201) {
+        document.cookie = `auth_token=${response.data.token}; path=/`; // Store token in a cookie
+        navigate("/dashboard"); // Redirect to dashboard
+      }
+    } catch (err) {
+      console.error("Register error:", err);
+      if (err.response) {
+        console.error("Response data:", err.response.data);
+        console.error("Status code:", err.response.status);
+        setError(err.response.data.error || "An error occurred.");
+      } else if (err.request) {
+        console.error("No response received:", err.request);
+        setError("No response from server. Is the backend running?");
+      } else {
+        console.error("Request error:", err.message);
+        setError("Something went wrong. Please try again.");
+      }
+    }
   };
 
   return (
@@ -35,6 +72,7 @@ export default function Register() {
         </div>
 
         <div className="mt-8 bg-white py-8 px-10 shadow-lg rounded-xl border border-gray-50">
+          {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
               <label htmlFor="fullName" className="block text-sm font-medium text-gray-700">
