@@ -52,19 +52,7 @@ touch backend/backend/.env
 ```
 Add the following to `.env`:
 ```ini
-SECRET_KEY="your-secret-key-here"
-MONGO_URL="our Mongo url"
-```
-
-### **1.5 Ensure MongoDB is Running**
-#### **For WSL (Ubuntu)**
-```sh
-sudo systemctl start mongod
-```
-
-#### **For Mac (Homebrew)**
-```sh
-brew services start mongodb-community
+OPENAI_API_KEY="your openAI key"
 ```
 
 ---
@@ -89,7 +77,16 @@ Run **both frontend and backend** in separate terminals.
 ```sh
 cd backend
 source venv/bin/activate
-python manage.py runserver
+```
+To run the backend server, run one of the following commands (one of these will work):
+```
+daphne -p 8000 backend.asgi:application
+
+python -m daphne -p 8000 backend.asgi:application
+
+daphne -b 0.0.0.0 -p 8000 backend.asgi:application
+
+python -m daphne -b 0.0.0.0 -p 8000 backend.asgi:application
 ```
 Backend will be running at **`http://localhost:8000/`**.
 
