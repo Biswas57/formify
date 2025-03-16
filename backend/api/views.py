@@ -8,6 +8,7 @@ from rest_framework import status
 from rest_framework.authentication import TokenAuthentication
 from django.db import transaction
 from django.shortcuts import get_object_or_404
+from .models import Form
 
 from .serializers import (
     UserRegistrationSerializer,
@@ -139,4 +140,154 @@ class FormCompositionView(APIView):
             'has_id_short': composition.has_id_short,
             'has_address_info': composition.has_address_info,
             'has_notes': composition.has_notes
+        }, status=status.HTTP_201_CREATED)
+
+    def delete(self, request, composition_id=None):
+        """
+        Delete a specific form composition
+        """
+        if not composition_id:
+            return Response(
+                {"error": "Form composition ID is required for deletion"}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+            
+        composition = get_object_or_404(
+            FormComposition, 
+            form_composition_id=composition_id, 
+            owner=request.user
+        )
+        
+        # Save the name for the response
+        name = composition.name
+        
+        # Delete the composition
+        composition.delete()
+        
+        return Response({
+            "message": f"Form composition '{name}' (ID: {composition_id}) has been deleted successfully"
+        }, status=status.HTTP_200_OK)
+
+
+class FormCreateView(APIView):
+    """
+    View for creating forms based on form compositions
+    """
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    
+    @transaction.atomic
+    def post(self, request):
+        """
+        Create a new form based on a form composition
+        """
+        # Get form composition ID from request
+        composition_id = request.data.get('form_composition_id')
+        
+        if not composition_id:
+            return Response(
+                {"error": "form_composition_id is required"}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+            
+        # Verify form composition exists and is owned by the user
+        try:
+            composition = FormComposition.objects.get(
+                form_composition_id=composition_id,
+                owner=request.user
+            )
+        except FormComposition.DoesNotExist:
+            return Response(
+                {"error": "Form composition not found or you don't have permission to use it"}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        # Create a new form based on the composition
+        form = Form.objects.create(
+            form_composition=composition
+        )
+        
+        # Create info blocks based on composition settings
+        blocks_created = []
+        
+        # Create blocks in the order: ID Short, Address Info, Notes
+        order_id = 1
+        
+        # Create ID Short block if needed
+        if composition.has_id_short:
+            id_block = InfoBlock.objects.create(
+                form=form,
+                info_type='id_short',
+                order_id=order_id
+            )
+            
+            # Create associated IdShort entry
+            id_short = IdShort.objects.create(
+                info=id_block,
+                name=request.data.get('id_short_name', ''),
+                number=request.data.get('id_short_number', ''),
+                email=request.data.get('id_short_email', ''),
+                type=request.data.get('id_short_type', '')
+            )
+            
+            blocks_created.append({
+                'type': 'id_short',
+                'info_id': id_block.info_id,
+                'order_id': id_block.order_id
+            })
+            
+            order_id += 1
+        
+        # Create Address Info block if needed
+        if composition.has_address_info:
+            address_block = InfoBlock.objects.create(
+                form=form,
+                info_type='address_info',
+                order_id=order_id
+            )
+            
+            # Create associated AddressInfo entry
+            address_info = AddressInfo.objects.create(
+                info=address_block,
+                type=request.data.get('address_info_type', '')
+            )
+            
+            blocks_created.append({
+                'type': 'address_info',
+                'info_id': address_block.info_id,
+                'order_id': address_block.order_id
+            })
+            
+            order_id += 1
+        
+        # Create Notes block if needed
+        if composition.has_notes:
+            notes_block = InfoBlock.objects.create(
+                form=form,
+                info_type='notes',
+                order_id=order_id
+            )
+            
+            # Create associated Notes entry
+            notes = Notes.objects.create(
+                info=notes_block,
+                content=request.data.get('notes_content', '')
+            )
+            
+            blocks_created.append({
+                'type': 'notes',
+                'info_id': notes_block.info_id,
+                'order_id': notes_block.order_id
+            })
+        
+        # Return the created form details
+        return Response({
+            'form_id': form.id,
+            'form_composition': {
+                'id': composition.form_composition_id,
+                'name': composition.name
+            },
+            'created_at': form.created_at,
+            'updated_at': form.updated_at,
+            'blocks': blocks_created
         }, status=status.HTTP_201_CREATED)
