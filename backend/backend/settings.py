@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',  # Handles token-based authentication
     'api',
     'corsheaders',
+    'daphne',
 ]
 
 MIDDLEWARE = [
@@ -89,6 +90,13 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'backend.wsgi.application'
+ASGI_APPLICATION = 'backend.wsgi.application'
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    }
+}
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
