@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Link } from "react-router-dom";
+import toast, { Toaster } from 'react-hot-toast';
+
 
 export default function Register() {
   const [form, setForm] = useState({ fullName: "", email: "", password: "", confirmPassword: "" });
@@ -23,12 +25,85 @@ export default function Register() {
     setForm({ ...form, [name]: value });
   };
 
+  const validateForm = () => {
+    if (!form.fullName.trim()) {
+      toast.error('Please enter your full name', {
+        duration: 3000,
+        position: 'top-center',
+        style: {
+          background: '#FEE2E2',
+          color: '#DC2626',
+          padding: '16px',
+        },
+        icon: '❌',
+      });
+      return false;
+    }
+
+    if (!form.email.trim()) {
+      toast.error('Please enter your email address', {
+        duration: 3000,
+        position: 'top-center',
+        style: {
+          background: '#FEE2E2',
+          color: '#DC2626',
+          padding: '16px',
+        },
+        icon: '❌',
+      });
+      return false;
+    }
+
+    if (!form.password) {
+      toast.error('Please enter a password', {
+        duration: 3000,
+        position: 'top-center',
+        style: {
+          background: '#FEE2E2',
+          color: '#DC2626',
+          padding: '16px',
+        },
+        icon: '❌',
+      });
+      return false;
+    }
+
+    if (form.password.length < 8) {
+      toast.error('Password must be at least 8 characters long', {
+        duration: 3000,
+        position: 'top-center',
+        style: {
+          background: '#FEE2E2',
+          color: '#DC2626',
+          padding: '16px',
+        },
+        icon: '❌',
+      });
+      return false;
+    }
+
+    if (form.password !== form.confirmPassword) {
+      toast.error('Passwords do not match', {
+        duration: 3000,
+        position: 'top-center',
+        style: {
+          background: '#FEE2E2',
+          color: '#DC2626',
+          padding: '16px',
+        },
+        icon: '❌',
+      });
+      return false;
+    }
+
+    return true;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
-    if (form.password !== form.confirmPassword) {
-      setError("Passwords do not match.");
+    if (!validateForm()) {
       return;
     }
 
@@ -37,7 +112,7 @@ export default function Register() {
         "http://127.0.0.1:8000/api/auth/register/",
         JSON.stringify({
           email: form.email,
-          username: form.fullName, // Save full name as username
+          username: form.fullName,
           password: form.password,
           password2: form.confirmPassword,
         }),
@@ -49,26 +124,81 @@ export default function Register() {
 
       if (response.status === 201) {
         document.cookie = `auth_token=${response.data.token}; path=/`;
+        toast.success('Successfully registered!', {
+          duration: 2000,
+          position: 'top-center',
+          style: {
+            background: '#DCFCE7',
+            color: '#16A34A',
+            padding: '16px',
+          },
+        });
         navigate("/dashboard");
       }
     } catch (err) {
       console.error("Register error:", err);
       if (err.response) {
-        setError(err.response.data.error || "An error occurred.");
+        const errorMessage = err.response.data.error || "Registration failed";
+        setError(errorMessage);
+        toast.error(errorMessage, {
+          duration: 3000,
+          position: 'top-center',
+          style: {
+            background: '#FEE2E2',
+            color: '#DC2626',
+            padding: '16px',
+          },
+          icon: '❌',
+        });
       } else if (err.request) {
-        setError("No response from server. Is the backend running?");
+        const errorMessage = "No response from server. Please check your connection";
+        setError(errorMessage);
+        toast.error(errorMessage, {
+          duration: 3000,
+          position: 'top-center',
+          style: {
+            background: '#FEE2E2',
+            color: '#DC2626',
+            padding: '16px',
+          },
+          icon: '🔌',
+        });
       } else {
-        setError("Something went wrong. Please try again.");
+        const errorMessage = "Something went wrong. Please try again";
+        setError(errorMessage);
+        toast.error(errorMessage, {
+          duration: 3000,
+          position: 'top-center',
+          style: {
+            background: '#FEE2E2',
+            color: '#DC2626',
+            padding: '16px',
+          },
+          icon: '⚠️',
+        });
       }
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-      <div className="max-w-md w-full space-y-8">
+    <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
+      <Toaster />
+      {/* Video Background */}
+      <video
+        autoPlay
+        loop
+        muted
+        className="absolute w-full h-full object-cover"
+        // style={{ filter: 'brightness(0.7)' }}
+      >
+        <source src="/videoplayback.mp4" type="video/mp4" />
+      </video>
+
+      {/* Content */}
+      <div className="max-w-md w-full space-y-8 relative z-10">
         <div className="text-center">
-          <h1 className="text-4xl font-extrabold text-blue-600 tracking-tight mb-2">Formify</h1>
-          <h2 className="mt-6 text-2xl font-bold text-gray-900">Create your account</h2>
+        <h1 className="text-6xl font-extrabold tracking-tight mb-2 bg-gradient-to-r from-blue-400 to-blue-600 text-transparent bg-clip-text italic pb-3">Formify</h1>
+        <h2 className="mt-6 text-2xl font-bold text-gray-900">Create your account</h2>
           <p className="mt-2 text-sm text-gray-500">
             Already have an account?{" "}
             <Link to="/login" className="font-medium text-blue-600 hover:text-blue-500">

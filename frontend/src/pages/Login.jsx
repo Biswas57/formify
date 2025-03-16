@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Link } from "react-router-dom";
+import toast, { Toaster } from 'react-hot-toast';
 
 export default function Login() {
   const [form, setForm] = useState({ email: "", password: "" });
@@ -40,35 +41,90 @@ export default function Login() {
       
       if (response.status === 200) {
         document.cookie = `auth_token=${response.data.token}; path=/`;
+        toast.success('Successfully logged in!', {
+          duration: 2000,
+          position: 'top-center',
+          style: {
+            background: '#DCFCE7',
+            color: '#16A34A',
+            padding: '16px',
+          },
+        });
         navigate("/dashboard");
       }
     } catch (err) {
       console.error("Login error:", err);
       if (err.response) {
-        setError(err.response.data.error || "An error occurred.");
+        const errorMessage = err.response.data.error || "Invalid credentials";
+        setError(errorMessage);
+        toast.error(errorMessage, {
+          duration: 3000,
+          position: 'top-center',
+          style: {
+            background: '#FEE2E2',
+            color: '#DC2626',
+            padding: '16px',
+          },
+          icon: '❌',
+        });
       } else if (err.request) {
-        setError("No response from server. Is the backend running?");
+        const errorMessage = "No response from server. Please check your connection";
+        setError(errorMessage);
+        toast.error(errorMessage, {
+          duration: 3000,
+          position: 'top-center',
+          style: {
+            background: '#FEE2E2',
+            color: '#DC2626',
+            padding: '16px',
+          },
+          icon: '🔌',
+        });
       } else {
-        setError("Something went wrong. Please try again.");
+        const errorMessage = "Something went wrong. Please try again";
+        setError(errorMessage);
+        toast.error(errorMessage, {
+          duration: 3000,
+          position: 'top-center',
+          style: {
+            background: '#FEE2E2',
+            color: '#DC2626',
+            padding: '16px',
+          },
+          icon: '⚠️',
+        });
       }
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-      <div className="max-w-md w-full space-y-8">
+    <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
+      <Toaster />
+      {/* Video Background */}
+      <video
+        autoPlay
+        loop
+        muted
+        className="absolute w-full h-full object-cover"
+        // style={{ filter: 'brightness(0.7)' }}
+      >
+        <source src="/videoplayback.mp4" type="video/mp4" />
+      </video>
+
+      {/* Content */}
+      <div className="max-w-md w-full space-y-8 relative z-10">
         <div className="text-center">
-          <h1 className="text-4xl font-extrabold text-blue-600 tracking-tight mb-2">Formify</h1>
-          <h2 className="mt-6 text-2xl font-bold text-gray-900">Sign in to your account</h2>
-          <p className="mt-2 text-sm text-gray-500">
+          <h1 className="text-6xl font-extrabold tracking-tight mb-2 bg-gradient-to-r from-blue-600 to-blue-400 text-transparent bg-clip-text italic pb-3">Formify</h1>
+          <h2 className="mt-6 text-2xl font-bold text-stone-900">Sign in to your account</h2>
+          <p className="mt-2 text-sm text-stone-400">
             Or{" "}
-            <Link to="/register" className="font-medium text-blue-600 hover:text-blue-500">
+            <Link to="/register" className="font-medium text-blue-400 hover:text-blue-600">
               create a new account
             </Link>
           </p>
         </div>
 
-        <div className="mt-8 bg-white py-8 px-10 shadow-lg rounded-xl border border-gray-50">
+        <div className="mt-8 bg-white/90 backdrop-blur-2xl py-8 px-10 shadow-lg rounded-xl border border-gray-50">
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">
@@ -117,7 +173,7 @@ export default function Login() {
               </button>
             </div>
           </form>
-          {error && <p className="text-red-500 text-sm mt-4">{error}</p>}
+          {/* {error && <p className="text-red-500 text-sm mt-4">{error}</p>} */}
         </div>
       </div>
     </div>
