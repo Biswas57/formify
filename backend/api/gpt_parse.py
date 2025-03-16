@@ -53,7 +53,7 @@ Do not include any markdown formatting, code fences, or extra characters; return
     completion = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",  # Cost-effective model for revision.
         messages=[
-            {"role": "system", "content": systemMessage},
+            {"role": "You are a transcription editor working in a professional, Australian context", "content": systemMessage},
             {"role": "user", "content": rawText},
         ],
         max_tokens=100,
@@ -91,7 +91,6 @@ def extractAttributesFromText(correctedText: str, templateAttributes: List[str])
     global totalUsage
 
     systemMessage = f"""
-You are an attribute extraction assistant specialized for an Australian environment.
 This tool is primarily used in Finance, Healthcare, Social Work and Human Resource contexts.
 Your task is to extract only the relevant values for the provided attributes from the corrected transcription,
 ensuring that you filter out any irrelevant information that might result from audio errors.
@@ -107,7 +106,7 @@ Attributes to find: {templateAttributes}
     completion = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",  # Cost-effective model for attribute extraction.
         messages=[
-            {"role": "system", "content": systemMessage},
+            {"role": "You are an attribute extraction assistant specialized for an Australian environment.", "content": systemMessage},
             {"role": "user", "content": correctedText},
         ],
         max_tokens=200,
@@ -142,17 +141,20 @@ def parseFinalAttributes(fullTranscript: str, collectedAttributes: list[dict]) -
     global totalUsage
 
     systemMessage = f"""
-You are an attribute selection assistant.
 You are provided with a full transcript of a meeting and a list of candidate attribute dictionaries extracted from the transcript.
 Your task is to determine the final, most suitable value for each attribute based on the context provided by the full transcript.
-For example, if the attribute is "name", ensure that you select the value that corresponds to the transcript subject or the relevant individual.
+Please verify these values against the complete transcript and correct any errors. 
+
+If a particular field has a correct value, keep it as is. If it's incorrect or incomplete, provide the correct value.
+If a field truly has no value in the transcript, return 'N/A'.
+
 Return your result as a JSON object with the key "finalAttributes" where each attribute maps to its final selected value.
 Do not include any markdown formatting, code fences, or extra characters; return pure JSON.
 Transcript:
 {fullTranscript}
 
 Candidate Attributes:
-{collectedAttributes}
+{json.dumps(collectedAttributes, indent=2)}
 """
 
     start_time = time.time()
@@ -178,8 +180,7 @@ Candidate Attributes:
         print("Error parsing JSON in parseFinalAttributes:", e)
         parsed_response = FinalAttributeExtractionResponse(finalAttributes={})
 
-    print(f"\n[{elapsed_time:.2f}s] parseFinalAttributes -> Usage: {usage}, Total Usage: {totalUsage}, "
-          f"Cost: ${round(0.06/1e6 * totalUsage, 5)}")
+    print(f"\n[{elapsed_time:.2f}s] parseFinalAttributes -> Usage: {usage}, Total Usage: {totalUsage}")
     print("\nFinal Attribute Extraction Response:", parsed_response)
 
     return parsed_response.finalAttributes

@@ -23,14 +23,14 @@ from asgiref.sync import sync_to_async
 
 import tempfile, asyncio
 from channels.generic.websocket import AsyncWebsocketConsumer
-from .groq_parse import parseTranscribedText
+from .gpt_parse import parseTranscribedText, parseFinalAttributes
 import requests
 
-MIN_CHUNK_NUM = 10
+MIN_CHUNK_NUM = 5
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 WHISPER_API_URL = "https://api.openai.com/v1/audio/transcriptions"
 
-client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+client = openai.api_key = OPENAI_API_KEY
 model = whisper.load_model("base")
 
 class TranscriptionConsumer(AsyncWebsocketConsumer):
@@ -142,72 +142,10 @@ class TranscriptionConsumer(AsyncWebsocketConsumer):
         """
         Process the complete transcript to verify and correct the extracted attributes.
         """
-        form = await sync_to_async(Form.objects.get)(id=self.scope['url_route']['kwargs']['formid'])
-        
-        # Build the field list for the prompt
-        field_list = []
-        for block in await sync_to_async(list)(form.blocks.all()):
-            for field in await sync_to_async(list)(block.fields.all()):
-                field_list.append({
-                    "block_name": block.block_name,
-                    "field_name": field.field_name,
-                    "field_type": field.field_type,
-                    "current_value": self.current_attributes.get(field.field_name, "N/A")
-                })
-
-        prompt = f"""
-        You are an AI that extracts and verifies structured data from spoken text. The spoken text may be a conversation between a professional and a client.
-        
-        Below is a complete transcript and a list of form fields with their current values that were extracted incrementally.
-        Please verify these values against the complete transcript and correct any errors. 
-        Use the full context of the transcript to ensure accuracy.
-        
-        If a particular field has a correct value, keep it as is. If it's incorrect or incomplete, provide the correct value.
-        If a field truly has no value in the transcript, return 'N/A'.
-
-        Transcript:
-        "{self.full_transcript}"
-
-        Current Form Fields with Values:
-        {json.dumps(field_list, indent=2)}
-
-        Return a JSON object that maps field names to their final verified values:
-        {{
-            "Field Name 1": "Verified Value 1",
-            "Field Name 2": "Verified Value 2",
-            ...
-        }}
-        """
-
-        try:
-            loop = asyncio.get_event_loop()
-            response = await loop.run_in_executor(
-                None,
-                lambda: client.chat.completions.create(
-                    model="gpt-4",
-                    messages=[
-                        {"role": "system", "content": "You are a helpful assistant that verifies and corrects extracted data."},
-                        {"role": "user", "content": prompt}
-                    ],
-                    temperature=0.2
-                )
-            )
-
-            ai_response = response.choices[0].message.content
-
-            # Ensure valid JSON output
-            verified_attributes = json.loads(ai_response)
-            
-            print("Final sweep completed. Verified attributes:", verified_attributes)
-            return verified_attributes
-
-        except json.JSONDecodeError:
-            print("Error: OpenAI API response could not be parsed as JSON.")
-            return self.current_attributes  # Return current attributes if parsing fails
-        except Exception as e:
-            print(f"Error with OpenAI API during final sweep: {e}")
-            return self.current_attributes  # Return current attributes if API call fails
-
+        final_attributes = parseFinalAttributes(self.full_transcript, self.all_attributes)
+        print("Final sweep completed. Verified attributes:", final_attributes)
+        return final_attributes
+    
     def check_webm_integrity(self, audio_data):
         """
         Checks whether the audio_data starts with the minimal WebM EBML header signature.
