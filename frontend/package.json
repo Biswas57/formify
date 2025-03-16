@@ -20,9 +20,11 @@
     "html2pdf": "^0.0.11",
     "html2pdf.js": "^0.10.3",
     "jspdf": "^3.0.0",
+    "lucide-react": "^0.482.0",
     "react": "^19.0.0",
     "react-dnd": "^16.0.1",
     "react-dom": "^19.0.0",
+    "react-hot-toast": "^2.5.2",
     "react-router-dom": "^7.3.0",
     "tailwindcss": "^4.0.14"
   },

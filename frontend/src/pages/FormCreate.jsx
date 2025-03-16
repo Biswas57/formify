@@ -9,6 +9,8 @@ import {
   arrayMove,
 } from "@dnd-kit/sortable";
 import { blocksConfig } from "../blocksConfig";
+import toast, { Toaster } from 'react-hot-toast';
+
 
 // Helper to get a cookie value
 function getCookie(name) {
@@ -86,7 +88,15 @@ export default function FormCreate() {
   // Save the form by sending a POST request to the backend
   const handleSave = async () => {
     if (!formName.trim()) {
-      alert("Please enter a form name.");
+      toast.error('Please enter a form name.', {
+        duration: 2000,
+        position: 'top-center',
+        style: {
+          background: '#FEE2E2',
+          color: '#DC2626',
+          padding: '16px',
+        },
+      });
       return;
     }
     setSaving(true);
@@ -116,14 +126,30 @@ export default function FormCreate() {
       }
 
       const data = await response.json();
-      alert("Form saved successfully!");
+      toast.success('Form saved successfully!', {
+        duration: 2000,
+        position: 'top-center',
+        style: {
+          background: '#DCFCE7',
+          color: '#16A34A',
+          padding: '16px',
+        },
+      });
       console.log("Saved form:", data);
       // Clear form state after a successful save.
       setFormName("");
       setFormBlocks([]);
     } catch (error) {
       console.error("Error saving form:", error);
-      alert("Error saving form. Please try again.");
+      toast.error('Error saving form. Please try again.', {
+        duration: 2000,
+        position: 'top-center',
+        style: {
+          background: '#FEE2E2',
+          color: '#DC2626',
+          padding: '16px',
+        },
+      });
     } finally {
       setSaving(false);
     }
@@ -131,6 +157,7 @@ export default function FormCreate() {
 
   return (
     <div className="max-w-6xl">
+      <Toaster />
       {/* Header */}
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold">Create New Form</h1>
@@ -163,7 +190,7 @@ export default function FormCreate() {
       <div className="mb-6">
         <label
           htmlFor="formName"
-          className="block text-sm font-medium text-gray-700 mb-1"
+          className="block text-lg font-medium text-gray-700 mb-1"
         >
           Form Name
         </label>
@@ -172,7 +199,7 @@ export default function FormCreate() {
           id="formName"
           value={formName}
           onChange={(e) => setFormName(e.target.value)}
-          className="w-full md:w-1/2 p-2 border border-gray-300 rounded-md"
+          className="w-full text-lg md:w-1/2 p-2 border border-gray-300 rounded-md"
           placeholder="Enter form name..."
         />
       </div>
@@ -288,7 +315,15 @@ export default function FormCreate() {
               <button
                 className="w-full border border-blue-600 font-bold text-blue-600 py-2 px-4 rounded flex items-center justify-center cursor-pointer transition-transform duration-200 transform-gpu hover:scale-102"
                 onClick={() =>
-                  alert("Custom block creation coming soon!")
+                  toast.error('Custom block creation coming soon!', {
+                    duration: 2000,
+                    position: 'top-center',
+                    style: {
+                      background: '#FEE2E2',
+                      color: '#DC2626',
+                      padding: '16px',
+                    },
+                  })
                 }
               >
                 <svg
