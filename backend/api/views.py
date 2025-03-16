@@ -42,6 +42,8 @@ def upload_audio(request, form_id):
             os.remove(file_path)
             os.remove(wav_path)
 
+            print(os.getenv("OPENAI_API_KEY"))
+
             return JsonResponse({"transcript": transcript, "fields": extracted_data})
 
         except Exception as e:
