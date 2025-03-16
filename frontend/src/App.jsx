@@ -25,7 +25,7 @@ export default function App() {
           </ProtectedRoute>
         }
       >
-        <Route index element={<Dashboard />} />
+        <Route index element={<FormCreate />} />
         <Route path="formcreate" element={<FormCreate />} />
         <Route path="myforms" element={<MyForms />} />
         <Route path="form/:formId" element={<SavedForm />} />
