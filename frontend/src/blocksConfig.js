@@ -1,19 +1,19 @@
 export const blocksConfig = {
-  ID: {
+  IDShort: {
     label: "ID",
     fields: ["Name", "Phone Number", "Email"],
   },
-  IDExtended: {
+  IDLong: {
     label: "ID Extended",
     fields: ["Name", "Phone Number", "Email", "Address", "Date of Birth"],
+  },
+  MonthlyLivingExpenses: {
+    label: "ID Extended",
+    fields: ["Food", "Recreation", "Insurances", "Utilities", "Rent", "Debt Repayments"],
   },
   Medical: {
     label: "Medical",
     fields: ["Allergies", "Current Medications", "Medical History"],
-  },
-  MedicalProfessional: {
-    label: "Medical Professional",
-    fields: ["Name", "License Number", "Specialization", "Years of Experience"],
   },
   Education: {
     label: "Education",
@@ -24,18 +24,17 @@ export const blocksConfig = {
     fields: [
       "Platform",
       "Username",
-      "Profile URL",
       "Follower Count",
     ],
   },
   Financial: {
     label: "Financial",
     fields: [
-      "Bank Name",
-      "Account Number",
-      "Routing Number",
+      "Employment",
+      "Net Equity",
       "Credit Score",
       "Annual Income",
+      "Debt Service Coverage Ratio",
     ],
   },
   // etc.

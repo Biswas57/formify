@@ -44,6 +44,7 @@ class TranscriptionConsumer(AsyncWebsocketConsumer):
         self.latest_transcript = ""  # Most recent transcription
         self.all_attributes = []     # Cumulative list of all attribute dictionaries
         self.current_attributes = {} # Cumulative current attribute dictionary
+        self.final_sweep_completed = False
         form = await sync_to_async(Form.objects.get)(id=formid)
 
         # Build the prompt to send to OpenAI
@@ -60,20 +61,36 @@ class TranscriptionConsumer(AsyncWebsocketConsumer):
         self.webm_header = None  # store the first valid chunk as header
 
     async def disconnect(self, close_code):
-        # On disconnect, send the cumulative transcription and attribute list.
-        
-        
-        await self.send(text_data=json.dumps({
-            "corrected_audio": self.full_transcript,
-            "attributes": self.current_attributes  # cumulative current attributes
-        }))
+        # On disconnect, if no final sweep was performed, send the current data
+        if not self.final_sweep_completed:
+            await self.send(text_data=json.dumps({
+                "corrected_audio": self.full_transcript,
+                "attributes": self.current_attributes
+            }))
 
-    async def receive(self, bytes_data=None, template_id=None):
-        if not self.template:
-            # Hard-coded template; ideally, load from your DB.
-            self.template = ["name", "to my left", "DOB", "Location", "Place of Birth"]
+    async def receive(self, bytes_data=None, text_data=None):
+        # Handle text data (control messages)
+        if text_data:
+            data = json.loads(text_data)
+            if data.get('action') == 'stop_recording':
+                # Process final sweep
+                final_attributes = await self.process_final_sweep()
+                self.final_sweep_completed = True
+                
+                # Send final results
+                await self.send(text_data=json.dumps({
+                    "final_results": True,
+                    "corrected_audio": self.full_transcript,
+                    "attributes": final_attributes
+                }))
+                return
 
+        # Handle binary data (audio chunks)
         if bytes_data:
+            if not self.template:
+                # Hard-coded template; ideally, load from your DB.
+                self.template = ["name", "to my left", "DOB", "Location", "Place of Birth"]
+
             # Check if this incoming chunk has a valid WebM header signature.
             if self.webm_header is None and self.check_webm_integrity(bytes_data):
                 # Store the entire first chunk as the header.
@@ -120,6 +137,76 @@ class TranscriptionConsumer(AsyncWebsocketConsumer):
                 # Reset for the next aggregation round.
                 self.audio_buffer = b""
                 self.nchunks = 0
+
+    async def process_final_sweep(self):
+        """
+        Process the complete transcript to verify and correct the extracted attributes.
+        """
+        form = await sync_to_async(Form.objects.get)(id=self.scope['url_route']['kwargs']['formid'])
+        
+        # Build the field list for the prompt
+        field_list = []
+        for block in await sync_to_async(list)(form.blocks.all()):
+            for field in await sync_to_async(list)(block.fields.all()):
+                field_list.append({
+                    "block_name": block.block_name,
+                    "field_name": field.field_name,
+                    "field_type": field.field_type,
+                    "current_value": self.current_attributes.get(field.field_name, "N/A")
+                })
+
+        prompt = f"""
+        You are an AI that extracts and verifies structured data from spoken text. The spoken text may be a conversation between a professional and a client.
+        
+        Below is a complete transcript and a list of form fields with their current values that were extracted incrementally.
+        Please verify these values against the complete transcript and correct any errors. 
+        Use the full context of the transcript to ensure accuracy.
+        
+        If a particular field has a correct value, keep it as is. If it's incorrect or incomplete, provide the correct value.
+        If a field truly has no value in the transcript, return 'N/A'.
+
+        Transcript:
+        "{self.full_transcript}"
+
+        Current Form Fields with Values:
+        {json.dumps(field_list, indent=2)}
+
+        Return a JSON object that maps field names to their final verified values:
+        {{
+            "Field Name 1": "Verified Value 1",
+            "Field Name 2": "Verified Value 2",
+            ...
+        }}
+        """
+
+        try:
+            loop = asyncio.get_event_loop()
+            response = await loop.run_in_executor(
+                None,
+                lambda: client.chat.completions.create(
+                    model="gpt-4",
+                    messages=[
+                        {"role": "system", "content": "You are a helpful assistant that verifies and corrects extracted data."},
+                        {"role": "user", "content": prompt}
+                    ],
+                    temperature=0.2
+                )
+            )
+
+            ai_response = response.choices[0].message.content
+
+            # Ensure valid JSON output
+            verified_attributes = json.loads(ai_response)
+            
+            print("Final sweep completed. Verified attributes:", verified_attributes)
+            return verified_attributes
+
+        except json.JSONDecodeError:
+            print("Error: OpenAI API response could not be parsed as JSON.")
+            return self.current_attributes  # Return current attributes if parsing fails
+        except Exception as e:
+            print(f"Error with OpenAI API during final sweep: {e}")
+            return self.current_attributes  # Return current attributes if API call fails
 
     def check_webm_integrity(self, audio_data):
         """
