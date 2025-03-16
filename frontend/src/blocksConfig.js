@@ -1,14 +1,14 @@
 export const blocksConfig = {
   IDShort: {
-    label: "ID",
+    label: "ID Short",
     fields: ["Name", "Phone Number", "Email"],
   },
   IDLong: {
-    label: "ID Extended",
+    label: "ID Long",
     fields: ["Name", "Phone Number", "Email", "Address", "Date of Birth"],
   },
   MonthlyLivingExpenses: {
-    label: "ID Extended",
+    label: "Monthly Living Expenses",
     fields: ["Food", "Recreation", "Insurances", "Utilities", "Rent", "Debt Repayments"],
   },
   Medical: {
@@ -37,5 +37,4 @@ export const blocksConfig = {
       "Debt Service Coverage Ratio",
     ],
   },
-  // etc.
 };

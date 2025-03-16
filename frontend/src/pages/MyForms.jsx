@@ -48,7 +48,7 @@ export default function MyForms() {
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold text-gray-800">My Forms</h1>
         <NavLink
-          to="/dashboard/formcreate"
+          to="/dashboard"
           className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg shadow-sm flex items-center transition-all duration-200 ease-in-out transform hover:-translate-y-0.5"
         >
           <svg
@@ -73,7 +73,7 @@ export default function MyForms() {
           <div className="p-8 text-center">
             <p className="text-gray-500 mb-4">No forms found</p>
             <NavLink
-              to="/dashboard/formcreate"
+              to="/dashboard"
               className="text-blue-600 hover:text-blue-800 font-medium"
             >
               Create your first form

@@ -26,7 +26,7 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from .groq_parse import parseTranscribedText
 import requests
 
-MIN_CHUNK_NUM = 15
+MIN_CHUNK_NUM = 10
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 WHISPER_API_URL = "https://api.openai.com/v1/audio/transcriptions"
 
