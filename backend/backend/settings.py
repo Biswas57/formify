@@ -39,8 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
-    'django.contrib.messages',
     'daphne',
+    'django.contrib.messages',
     'django.contrib.staticfiles',
     'channels',
     'rest_framework.authtoken',  # Handles token-based authentication
