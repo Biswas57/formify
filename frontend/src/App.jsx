@@ -9,6 +9,8 @@ import RecordPage from "./pages/RecordPage";
 import FilledForm from "./pages/FilledForm";
 import DashboardLayout from "./components/DashboardLayout";
 import ProtectedRoute from "./ProtectedRoute";
+import AudioRecorder from "./pages/AudioRecorder";
+import FormWithRecorder from "./pages/FormWithRecorder";
 
 export default function App() {
   return (
@@ -28,9 +30,11 @@ export default function App() {
         <Route index element={<FormCreate />} />
         <Route path="formcreate" element={<FormCreate />} />
         <Route path="myforms" element={<MyForms />} />
-        <Route path="form/:formId" element={<SavedForm />} />
+        <Route path="form/:formId" element={<FormWithRecorder />} />
+        
         <Route path="form/:formId/record" element={<RecordPage />} />
         <Route path="form/:formId/filled" element={<FilledForm />} />
+        <Route path="record" element={<AudioRecorder />} />
       </Route>
     </Routes>
   );
