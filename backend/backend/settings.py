@@ -24,12 +24,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-po#8izij$*ai_57_d*8&%kqce*g+!j@1sxer0zp7&aiotdj0hb'
+SECRET_KEY = os.getenv("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv("DEBUG", "False") == "True"
 
-ALLOWED_HOSTS = []
+
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "unihack-2025.onrender.com"]
 
 
 # Application definition
@@ -49,6 +50,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -56,7 +58,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
 ]
 
@@ -129,10 +130,14 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # ✅ Allow React frontend to access the backend
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",  # Allow frontend
+    "http://localhost:5173",  
+    "http://127.0.0.1:5173",
+    "https://unihack-2025-iota.vercel.app",
+    # Allow frontend
 ]
 
+# # (Optional) If unsure of the origin, temporarily allow all
+# CORS_ALLOW_ALL_ORIGINS = True  # Only use for debugging, NOT in production
 # ✅ Enable support for credentials (cookies, tokens)
 CORS_ALLOW_CREDENTIALS = True
 
