@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Link } from "react-router-dom";
-import toast, { Toaster } from 'react-hot-toast';
+import toast, { Toaster } from "react-hot-toast";
 
 export default function Login() {
   const [form, setForm] = useState({ email: "", password: "" });
@@ -29,7 +29,7 @@ export default function Login() {
 
     try {
       const response = await axios.post(
-        "http://127.0.0.1:8000/api/auth/login/",
+        "https://unihack-2025.onrender.com/api/auth/login/",
         JSON.stringify(form),
         {
           headers: {
@@ -38,16 +38,16 @@ export default function Login() {
           withCredentials: true,
         }
       );
-      
+
       if (response.status === 200) {
         document.cookie = `auth_token=${response.data.token}; path=/`;
-        toast.success('Successfully logged in!', {
+        toast.success("Successfully logged in!", {
           duration: 2000,
-          position: 'top-center',
+          position: "top-center",
           style: {
-            background: '#DCFCE7',
-            color: '#16A34A',
-            padding: '16px',
+            background: "#DCFCE7",
+            color: "#16A34A",
+            padding: "16px",
           },
         });
         navigate("/dashboard");
@@ -59,39 +59,40 @@ export default function Login() {
         setError(errorMessage);
         toast.error(errorMessage, {
           duration: 3000,
-          position: 'top-center',
+          position: "top-center",
           style: {
-            background: '#FEE2E2',
-            color: '#DC2626',
-            padding: '16px',
+            background: "#FEE2E2",
+            color: "#DC2626",
+            padding: "16px",
           },
-          icon: '❌',
+          icon: "❌",
         });
       } else if (err.request) {
-        const errorMessage = "No response from server. Please check your connection";
+        const errorMessage =
+          "No response from server. Please check your connection";
         setError(errorMessage);
         toast.error(errorMessage, {
           duration: 3000,
-          position: 'top-center',
+          position: "top-center",
           style: {
-            background: '#FEE2E2',
-            color: '#DC2626',
-            padding: '16px',
+            background: "#FEE2E2",
+            color: "#DC2626",
+            padding: "16px",
           },
-          icon: '🔌',
+          icon: "🔌",
         });
       } else {
         const errorMessage = "Something went wrong. Please try again";
         setError(errorMessage);
         toast.error(errorMessage, {
           duration: 3000,
-          position: 'top-center',
+          position: "top-center",
           style: {
-            background: '#FEE2E2',
-            color: '#DC2626',
-            padding: '16px',
+            background: "#FEE2E2",
+            color: "#DC2626",
+            padding: "16px",
           },
-          icon: '⚠️',
+          icon: "⚠️",
         });
       }
     }
@@ -114,11 +115,18 @@ export default function Login() {
       {/* Content */}
       <div className="max-w-md w-full space-y-8 relative z-10">
         <div className="text-center">
-          <h1 className="text-6xl font-extrabold tracking-tight mb-2 bg-gradient-to-r from-blue-600 to-blue-400 text-transparent bg-clip-text italic pb-3">Formify</h1>
-          <h2 className="mt-6 text-2xl font-bold text-stone-900">Sign in to your account</h2>
+          <h1 className="text-6xl font-extrabold tracking-tight mb-2 bg-gradient-to-r from-blue-600 to-blue-400 text-transparent bg-clip-text italic pb-3">
+            Formify
+          </h1>
+          <h2 className="mt-6 text-2xl font-bold text-stone-900">
+            Sign in to your account
+          </h2>
           <p className="mt-2 text-sm text-stone-400">
             Or{" "}
-            <Link to="/register" className="font-medium text-blue-400 hover:text-blue-600">
+            <Link
+              to="/register"
+              className="font-medium text-blue-400 hover:text-blue-600"
+            >
               create a new account
             </Link>
           </p>
@@ -127,7 +135,10 @@ export default function Login() {
         <div className="mt-8 bg-white/90 backdrop-blur-2xl py-8 px-10 shadow-lg rounded-xl border border-gray-50">
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Email address
               </label>
               <div className="mt-1">
@@ -146,7 +157,10 @@ export default function Login() {
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Password
               </label>
               <div className="mt-1">

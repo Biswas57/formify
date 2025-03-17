@@ -9,8 +9,7 @@ import {
   arrayMove,
 } from "@dnd-kit/sortable";
 import { blocksConfig } from "../blocksConfig";
-import toast, { Toaster } from 'react-hot-toast';
-
+import toast, { Toaster } from "react-hot-toast";
 
 // Helper to get a cookie value
 function getCookie(name) {
@@ -34,10 +33,13 @@ export default function FormCreate() {
   const handleAddBlock = (blockType) => {
     // Log to see what we get from blocksConfig for the given blockType
     console.log("Adding block for type:", blockType, blocksConfig[blockType]);
-    
+
     // Check if the value is an object with a fields property
     let fieldsArray;
-    if (blocksConfig[blockType] && Array.isArray(blocksConfig[blockType].fields)) {
+    if (
+      blocksConfig[blockType] &&
+      Array.isArray(blocksConfig[blockType].fields)
+    ) {
       fieldsArray = blocksConfig[blockType].fields;
     } else if (Array.isArray(blocksConfig[blockType])) {
       fieldsArray = blocksConfig[blockType];
@@ -48,7 +50,7 @@ export default function FormCreate() {
       );
       return;
     }
-    
+
     // Convert each field to an object.
     // If the field is a string, assign default field_type "TEXT".
     // If it's already an object, use its properties.
@@ -59,7 +61,7 @@ export default function FormCreate() {
         return { field_name: field.name, field_type: field.type };
       }
     });
-    
+
     const newBlock = {
       id: `block-${formBlocks.length + 1}`,
       type: blockType,
@@ -88,13 +90,13 @@ export default function FormCreate() {
   // Save the form by sending a POST request to the backend
   const handleSave = async () => {
     if (!formName.trim()) {
-      toast.error('Please enter a form name.', {
+      toast.error("Please enter a form name.", {
         duration: 2000,
-        position: 'top-center',
+        position: "top-center",
         style: {
-          background: '#FEE2E2',
-          color: '#DC2626',
-          padding: '16px',
+          background: "#FEE2E2",
+          color: "#DC2626",
+          padding: "16px",
         },
       });
       return;
@@ -112,27 +114,30 @@ export default function FormCreate() {
     };
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/auth/forms/create/", {
-        method: "POST",
-        headers: {
-          "Authorization": `Token ${getCookie("auth_token")}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
+      const response = await fetch(
+        "https://unihack-2025.onrender.com/api/auth/forms/create/",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Token ${getCookie("auth_token")}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to save form.");
       }
 
       const data = await response.json();
-      toast.success('Form saved successfully!', {
+      toast.success("Form saved successfully!", {
         duration: 2000,
-        position: 'top-center',
+        position: "top-center",
         style: {
-          background: '#DCFCE7',
-          color: '#16A34A',
-          padding: '16px',
+          background: "#DCFCE7",
+          color: "#16A34A",
+          padding: "16px",
         },
       });
       console.log("Saved form:", data);
@@ -141,13 +146,13 @@ export default function FormCreate() {
       setFormBlocks([]);
     } catch (error) {
       console.error("Error saving form:", error);
-      toast.error('Error saving form. Please try again.', {
+      toast.error("Error saving form. Please try again.", {
         duration: 2000,
-        position: 'top-center',
+        position: "top-center",
         style: {
-          background: '#FEE2E2',
-          color: '#DC2626',
-          padding: '16px',
+          background: "#FEE2E2",
+          color: "#DC2626",
+          padding: "16px",
         },
       });
     } finally {
@@ -287,7 +292,11 @@ export default function FormCreate() {
                   className="cursor-pointer relative group"
                   onClick={() => handleAddBlock(block.type)}
                 >
-                  <FormBlock id={block.id} type={block.type} isTemplate={true} />
+                  <FormBlock
+                    id={block.id}
+                    type={block.type}
+                    isTemplate={true}
+                  />
                   {/* Gradient overlay on hover */}
                   <div className="absolute inset-0 bg-gradient-to-r from-blue-50 to-blue-100 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
                   {/* Plus icon overlay on hover */}
@@ -315,13 +324,13 @@ export default function FormCreate() {
               <button
                 className="w-full border border-blue-600 font-bold text-blue-600 py-2 px-4 rounded flex items-center justify-center cursor-pointer transition-transform duration-200 transform-gpu hover:scale-102"
                 onClick={() =>
-                  toast.error('Custom block creation coming soon!', {
+                  toast.error("Custom block creation coming soon!", {
                     duration: 2000,
-                    position: 'top-center',
+                    position: "top-center",
                     style: {
-                      background: '#FEE2E2',
-                      color: '#DC2626',
-                      padding: '16px',
+                      background: "#FEE2E2",
+                      color: "#DC2626",
+                      padding: "16px",
                     },
                   })
                 }

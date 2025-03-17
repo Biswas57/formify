@@ -29,7 +29,7 @@ function FormWithRecorder() {
     const fetchForm = async () => {
       try {
         const response = await fetch(
-          `http://127.0.0.1:8000/api/auth/forms/${formId}/`,
+          `https://unihack-2025.onrender.com/api/auth/forms/${formId}/`,
           {
             method: "GET",
             headers: {
@@ -61,7 +61,7 @@ function FormWithRecorder() {
   // WebSocket connection setup
   useEffect(() => {
     const socket = new WebSocket(
-      `ws://localhost:8000/ws/transcription/${formId}/`
+      `wss://unihack-2025.onrender.com/ws/transcription/${formId}/`
     );
     socket.binaryType = "arraybuffer";
     socket.onopen = () => {
@@ -164,21 +164,21 @@ function FormWithRecorder() {
   // Improved PDF export function
   const exportToPdf = async () => {
     if (!formRef.current) return;
-    
+
     setIsGeneratingPdf(true);
-    
+
     try {
       // Create a temporary div to use for PDF generation
-      const pdfContainer = document.createElement('div');
-      pdfContainer.style.position = 'absolute';
-      pdfContainer.style.left = '-9999px';
-      pdfContainer.style.width = '210mm'; // A4 width
-      
+      const pdfContainer = document.createElement("div");
+      pdfContainer.style.position = "absolute";
+      pdfContainer.style.left = "-9999px";
+      pdfContainer.style.width = "210mm"; // A4 width
+
       // Clone the form for PDF generation
       const clone = formRef.current.cloneNode(true);
-      
+
       // Override some styles for better PDF output
-      const style = document.createElement('style');
+      const style = document.createElement("style");
       style.textContent = `
         * {
           font-family: 'Arial', sans-serif;
@@ -227,91 +227,92 @@ function FormWithRecorder() {
           min-height: 24px;
         }
       `;
-      
+
       // Create a styled version of the form
-      const styledForm = document.createElement('div');
-      styledForm.className = 'form-container';
-      
+      const styledForm = document.createElement("div");
+      styledForm.className = "form-container";
+
       // Add header
-      const header = document.createElement('div');
-      header.className = 'form-header';
-      const title = document.createElement('h1');
-      title.className = 'form-title';
+      const header = document.createElement("div");
+      header.className = "form-header";
+      const title = document.createElement("h1");
+      title.className = "form-title";
       title.textContent = formStructure.form_name;
       header.appendChild(title);
       styledForm.appendChild(header);
-      
+
       // Add blocks and fields
-      formStructure.blocks.forEach(block => {
-        const blockDiv = document.createElement('div');
-        blockDiv.className = 'block-container';
-        
-        const blockTitle = document.createElement('h2');
-        blockTitle.className = 'block-title';
+      formStructure.blocks.forEach((block) => {
+        const blockDiv = document.createElement("div");
+        blockDiv.className = "block-container";
+
+        const blockTitle = document.createElement("h2");
+        blockTitle.className = "block-title";
         blockTitle.textContent = block.block_name;
         blockDiv.appendChild(blockTitle);
-        
-        block.fields.forEach(field => {
-          const fieldDiv = document.createElement('div');
-          fieldDiv.className = 'field-container';
-          
-          const fieldLabel = document.createElement('div');
-          fieldLabel.className = 'field-label';
-          fieldLabel.textContent = field.field_name + ':';
+
+        block.fields.forEach((field) => {
+          const fieldDiv = document.createElement("div");
+          fieldDiv.className = "field-container";
+
+          const fieldLabel = document.createElement("div");
+          fieldLabel.className = "field-label";
+          fieldLabel.textContent = field.field_name + ":";
           fieldDiv.appendChild(fieldLabel);
-          
-          const fieldValue = document.createElement('div');
-          fieldValue.className = 'field-value';
-          fieldValue.textContent = formValues[field.field_name] || '';
+
+          const fieldValue = document.createElement("div");
+          fieldValue.className = "field-value";
+          fieldValue.textContent = formValues[field.field_name] || "";
           fieldDiv.appendChild(fieldValue);
-          
+
           blockDiv.appendChild(fieldDiv);
         });
-        
+
         styledForm.appendChild(blockDiv);
       });
-      
+
       pdfContainer.appendChild(style);
       pdfContainer.appendChild(styledForm);
       document.body.appendChild(pdfContainer);
-      
+
       // Generate PDF using html2canvas and jsPDF
       const canvas = await html2canvas(styledForm, {
         scale: 2,
         logging: false,
-        useCORS: true
+        useCORS: true,
       });
-      
-      const imgData = canvas.toDataURL('image/png');
-      
+
+      const imgData = canvas.toDataURL("image/png");
+
       // A4 dimensions in mm: 210 x 297
       const pdf = new jsPDF({
-        unit: 'mm',
-        format: 'a4',
-        orientation: 'portrait'
+        unit: "mm",
+        format: "a4",
+        orientation: "portrait",
       });
-      
+
       // Calculate the dimensions
       const imgWidth = 210; // A4 width in mm minus margins
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      
+
       // Add image to PDF (with 10mm margins on each side)
-      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
-      
+      pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
+
       // If content is longer than one page, add more pages
       let heightLeft = imgHeight;
       let position = 0;
-      
-      while (heightLeft > 297) { // A4 height
+
+      while (heightLeft > 297) {
+        // A4 height
         position = position - 297;
         pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
         heightLeft -= 297;
       }
-      
+
       // Save the PDF
       pdf.save(`${formStructure?.form_name || "form"}.pdf`);
-      
+
       // Clean up
       document.body.removeChild(pdfContainer);
     } catch (err) {
