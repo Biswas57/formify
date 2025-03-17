@@ -1,13 +1,14 @@
 import time
 import math
 import json
+import os
 from typing import List, Dict, Any
 from groq import Groq
 from pydantic import BaseModel
 
 # Create a global Groq client and usage counter.
 client = Groq(
-    api_key="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"
+    api_key=os.getenv("GROQ_API_KEY")
 )
 totalUsage = 0
 

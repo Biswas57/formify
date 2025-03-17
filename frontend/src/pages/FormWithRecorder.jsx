@@ -21,6 +21,7 @@ function FormWithRecorder() {
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const wsRef = useRef(null);
   const mediaRecorderRef = useRef(null);
+  const finalResultsReceivedRef = useRef(false);
   const streamRef = useRef(null);
   const formRef = useRef(null);
 
@@ -72,14 +73,22 @@ function FormWithRecorder() {
         const data = JSON.parse(event.data);
         console.log("WebSocket data received:", data);
 
-        if (data.attributes) {
-          setRealtimeAttributes((prev) => ({ ...prev, ...data.attributes }));
-          setFormValues((prev) => ({ ...prev, ...data.attributes }));
+        // If final results have already been received, ignore further messages.
+        if (finalResultsReceivedRef.current) {
+          console.log("Final results already processed. Ignoring message.");
+          return;
         }
 
+        // Check if this is the final result.
         if (data.final_results) {
           console.log("Received final verified results:", data.attributes);
           setRealtimeAttributes(data.attributes);
+          setFormValues((prev) => ({ ...prev, ...data.attributes }));
+          // Set the flag so that future messages are ignored.
+          finalResultsReceivedRef.current = true;
+        } else if (data.attributes) {
+          // Process intermediate messages.
+          setRealtimeAttributes((prev) => ({ ...prev, ...data.attributes }));
           setFormValues((prev) => ({ ...prev, ...data.attributes }));
         }
       } catch (err) {
@@ -101,9 +110,16 @@ function FormWithRecorder() {
   // Recording functions
   const startRecording = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          channelCount: 1,
+          sampleRate: 16000,
+          echoCancellation: true,
+          noiseSuppression: true
+        }
+      });
       streamRef.current = stream;
-      const options = { mimeType: "audio/webm" };
+      const options = { mimeType: "audio/webm; codecs=opus" };
       const recorder = new MediaRecorder(stream, options);
       mediaRecorderRef.current = recorder;
       recorder.ondataavailable = async (event) => {
@@ -118,7 +134,7 @@ function FormWithRecorder() {
           console.log(`Sent ${arrayBuffer.byteLength} bytes`);
         }
       };
-      recorder.start(500);
+      recorder.start(1000);
       setIsRecording(true);
     } catch (err) {
       console.error("Error starting recording:", err);
@@ -164,19 +180,19 @@ function FormWithRecorder() {
   // Improved PDF export function
   const exportToPdf = async () => {
     if (!formRef.current) return;
-    
+
     setIsGeneratingPdf(true);
-    
+
     try {
       // Create a temporary div to use for PDF generation
       const pdfContainer = document.createElement('div');
       pdfContainer.style.position = 'absolute';
       pdfContainer.style.left = '-9999px';
       pdfContainer.style.width = '210mm'; // A4 width
-      
+
       // Clone the form for PDF generation
       const clone = formRef.current.cloneNode(true);
-      
+
       // Override some styles for better PDF output
       const style = document.createElement('style');
       style.textContent = `
@@ -227,11 +243,11 @@ function FormWithRecorder() {
           min-height: 24px;
         }
       `;
-      
+
       // Create a styled version of the form
       const styledForm = document.createElement('div');
       styledForm.className = 'form-container';
-      
+
       // Add header
       const header = document.createElement('div');
       header.className = 'form-header';
@@ -240,78 +256,78 @@ function FormWithRecorder() {
       title.textContent = formStructure.form_name;
       header.appendChild(title);
       styledForm.appendChild(header);
-      
+
       // Add blocks and fields
       formStructure.blocks.forEach(block => {
         const blockDiv = document.createElement('div');
         blockDiv.className = 'block-container';
-        
+
         const blockTitle = document.createElement('h2');
         blockTitle.className = 'block-title';
         blockTitle.textContent = block.block_name;
         blockDiv.appendChild(blockTitle);
-        
+
         block.fields.forEach(field => {
           const fieldDiv = document.createElement('div');
           fieldDiv.className = 'field-container';
-          
+
           const fieldLabel = document.createElement('div');
           fieldLabel.className = 'field-label';
           fieldLabel.textContent = field.field_name + ':';
           fieldDiv.appendChild(fieldLabel);
-          
+
           const fieldValue = document.createElement('div');
           fieldValue.className = 'field-value';
           fieldValue.textContent = formValues[field.field_name] || '';
           fieldDiv.appendChild(fieldValue);
-          
+
           blockDiv.appendChild(fieldDiv);
         });
-        
+
         styledForm.appendChild(blockDiv);
       });
-      
+
       pdfContainer.appendChild(style);
       pdfContainer.appendChild(styledForm);
       document.body.appendChild(pdfContainer);
-      
+
       // Generate PDF using html2canvas and jsPDF
       const canvas = await html2canvas(styledForm, {
         scale: 2,
         logging: false,
         useCORS: true
       });
-      
+
       const imgData = canvas.toDataURL('image/png');
-      
+
       // A4 dimensions in mm: 210 x 297
       const pdf = new jsPDF({
         unit: 'mm',
         format: 'a4',
         orientation: 'portrait'
       });
-      
+
       // Calculate the dimensions
       const imgWidth = 210; // A4 width in mm minus margins
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      
+
       // Add image to PDF (with 10mm margins on each side)
       pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
-      
+
       // If content is longer than one page, add more pages
       let heightLeft = imgHeight;
       let position = 0;
-      
+
       while (heightLeft > 297) { // A4 height
         position = position - 297;
         pdf.addPage();
         pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
         heightLeft -= 297;
       }
-      
+
       // Save the PDF
       pdf.save(`${formStructure?.form_name || "form"}.pdf`);
-      
+
       // Clean up
       document.body.removeChild(pdfContainer);
     } catch (err) {

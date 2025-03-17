@@ -13,7 +13,7 @@ export const blocksConfig = {
   },
   Medical: {
     label: "Medical",
-    fields: ["Allergies", "Current Medications", "Medical History"],
+    fields: ["Symptoms", "Duration", "Possible Causes", "Allergies", "Current Medications", "Medical History"],
   },
   Education: {
     label: "Education",
