@@ -6,8 +6,8 @@ import toast, { Toaster } from "react-hot-toast";
 
 export default function Login() {
   const [form, setForm] = useState({
-    email: "testuser2025@example.com", // Added initial email
-    password: "StrongPass!2025", // Added initial password
+    email: "testuser2026@example.com", // Added initial email
+    password: "StrongPass!2026", // Added initial password
   });
   const [error, setError] = useState("");
   const navigate = useNavigate();
