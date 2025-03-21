@@ -141,20 +141,184 @@ export default function Register() {
       }
     } catch (err) {
       console.error("Register error:", err);
+
       if (err.response) {
-        const errorMessage = err.response.data.error || "Registration failed";
-        setError(errorMessage);
-        toast.error(errorMessage, {
-          duration: 3000,
-          position: "top-center",
-          style: {
-            background: "#FEE2E2",
-            color: "#DC2626",
-            padding: "16px",
-          },
-          icon: "❌",
-        });
-      } else if (err.request) {
+        // Handle specific Django auth error responses
+        const { data, status } = err.response;
+
+        // Handle field-specific validation errors (status 400)
+        if (status === 400) {
+          // Extract error data from response
+          const errorData = data;
+
+          // Function to display field errors
+          const displayFieldErrors = (fieldName, errors) => {
+            if (Array.isArray(errors)) {
+              errors.forEach((msg) => {
+                toast.error(`${fieldName}: ${msg}`, {
+                  duration: 3000,
+                  position: "top-center",
+                  style: {
+                    background: "#FEE2E2",
+                    color: "#DC2626",
+                    padding: "16px",
+                  },
+                  icon: "❌",
+                });
+              });
+            } else if (typeof errors === "string") {
+              toast.error(`${fieldName}: ${errors}`, {
+                duration: 3000,
+                position: "top-center",
+                style: {
+                  background: "#FEE2E2",
+                  color: "#DC2626",
+                  padding: "16px",
+                },
+                icon: "❌",
+              });
+            }
+          };
+
+          // Handle common Django auth field errors
+          if (errorData.email) displayFieldErrors("Email", errorData.email);
+          if (errorData.username)
+            displayFieldErrors("Username", errorData.username);
+          if (errorData.password)
+            displayFieldErrors("Password", errorData.password);
+          if (errorData.password2)
+            displayFieldErrors("Password confirmation", errorData.password2);
+          if (errorData.non_field_errors)
+            displayFieldErrors("Error", errorData.non_field_errors);
+
+          // Handle any custom fields errors
+          Object.keys(errorData).forEach((key) => {
+            if (
+              ![
+                "email",
+                "username",
+                "password",
+                "password2",
+                "non_field_errors",
+              ].includes(key)
+            ) {
+              displayFieldErrors(
+                key.charAt(0).toUpperCase() + key.slice(1).replace("_", " "),
+                errorData[key]
+              );
+            }
+          });
+
+          // If no specific errors were found but we got a 400, show general error
+          if (Object.keys(errorData).length === 0) {
+            const errorMessage = "Invalid registration data";
+            setError(errorMessage);
+            toast.error(errorMessage, {
+              duration: 3000,
+              position: "top-center",
+              style: {
+                background: "#FEE2E2",
+                color: "#DC2626",
+                padding: "16px",
+              },
+              icon: "❌",
+            });
+          }
+        }
+        // Handle unauthorized (status 401)
+        else if (status === 401) {
+          const errorMessage = data.detail || "Authentication failed";
+          setError(errorMessage);
+          toast.error(errorMessage, {
+            duration: 3000,
+            position: "top-center",
+            style: {
+              background: "#FEE2E2",
+              color: "#DC2626",
+              padding: "16px",
+            },
+            icon: "🔒",
+          });
+        }
+        // Handle forbidden (status 403)
+        else if (status === 403) {
+          const errorMessage = data.detail || "Registration forbidden";
+          setError(errorMessage);
+          toast.error(errorMessage, {
+            duration: 3000,
+            position: "top-center",
+            style: {
+              background: "#FEE2E2",
+              color: "#DC2626",
+              padding: "16px",
+            },
+            icon: "🚫",
+          });
+        }
+        // Handle not found (status 404)
+        else if (status === 404) {
+          const errorMessage = "Registration endpoint not found";
+          setError(errorMessage);
+          toast.error(errorMessage, {
+            duration: 3000,
+            position: "top-center",
+            style: {
+              background: "#FEE2E2",
+              color: "#DC2626",
+              padding: "16px",
+            },
+            icon: "🔍",
+          });
+        }
+        // Handle method not allowed (status 405)
+        else if (status === 405) {
+          const errorMessage = "Registration method not allowed";
+          setError(errorMessage);
+          toast.error(errorMessage, {
+            duration: 3000,
+            position: "top-center",
+            style: {
+              background: "#FEE2E2",
+              color: "#DC2626",
+              padding: "16px",
+            },
+            icon: "⛔",
+          });
+        }
+        // Handle server errors (status 500)
+        else if (status >= 500) {
+          const errorMessage = "Server error. Please try again later";
+          setError(errorMessage);
+          toast.error(errorMessage, {
+            duration: 3000,
+            position: "top-center",
+            style: {
+              background: "#FEE2E2",
+              color: "#DC2626",
+              padding: "16px",
+            },
+            icon: "🔧",
+          });
+        }
+        // Handle any other status codes
+        else {
+          const errorMessage =
+            data.error || data.detail || "Registration failed";
+          setError(errorMessage);
+          toast.error(errorMessage, {
+            duration: 3000,
+            position: "top-center",
+            style: {
+              background: "#FEE2E2",
+              color: "#DC2626",
+              padding: "16px",
+            },
+            icon: "❌",
+          });
+        }
+      }
+      // Handle network errors
+      else if (err.request) {
         const errorMessage =
           "No response from server. Please check your connection";
         setError(errorMessage);
@@ -168,7 +332,9 @@ export default function Register() {
           },
           icon: "🔌",
         });
-      } else {
+      }
+      // Handle unexpected errors
+      else {
         const errorMessage = "Something went wrong. Please try again";
         setError(errorMessage);
         toast.error(errorMessage, {
