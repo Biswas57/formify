@@ -2,10 +2,9 @@ import time
 import math
 import json
 import os
-from typing import List, Dict, Any
+from typing import List, Dict
 import openai
 import asyncio
-from dotenv import load_dotenv, find_dotenv
 from pydantic import BaseModel
 
 # Set the OpenAI API key.
@@ -176,7 +175,7 @@ Candidate Attributes:
 # --------------------
 # 4) Orchestrator: Steps 2–6
 # --------------------
-def parseTranscribedText(transcribedText: str, currentAttributes: dict, templateAttributes: List[str]):
+def parseTranscribedText(prevtranscribedText:str, transcribedText: str, currentAttributes: dict, templateAttributes: List[str]):
     """
     High-level function that:
     (1) Revises the transcription (Step 2).
@@ -189,7 +188,8 @@ def parseTranscribedText(transcribedText: str, currentAttributes: dict, template
     correctedText = reviseTranscription(transcribedText)
     
     # Step 3 & 4: Extract attributes.
-    parsedAttributes = extractAttributesFromText(correctedText, currentAttributes, templateAttributes)
+    correctedTextInContext = prevtranscribedText + correctedText
+    parsedAttributes = extractAttributesFromText(correctedTextInContext, currentAttributes, templateAttributes)
     
     # Step 5: Return the results.
     return correctedText, parsedAttributes

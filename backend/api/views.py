@@ -1,5 +1,4 @@
 import os, json
-import whisper, ffmpeg, openai
 import tempfile, asyncio, requests
 from django.contrib.auth.models import User
 from rest_framework import status
@@ -9,23 +8,15 @@ from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.contrib.auth.hashers import check_password
 from rest_framework.generics import ListAPIView
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from django.core.files.storage import default_storage
-from django.core.files.base import ContentFile
 from asgiref.sync import sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 from .models import Form
-from .groq_parse import parseTranscribedText, parseFinalAttributes
+from .gpt_parse import parseTranscribedText, parseFinalAttributes
 from .serializers import UserRegistrationSerializer, FormSerializer, FormDetailSerializer
 
-MIN_CHUNK_NUM = 10
+MIN_CHUNK_NUM = 8
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 WHISPER_API_URL = "https://api.openai.com/v1/audio/transcriptions"
-
-openai.api_key = OPENAI_API_KEY
-model = whisper.load_model("base")
-
 class TranscriptionConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         formid = self.scope['url_route']['kwargs']['formid']
@@ -33,10 +24,10 @@ class TranscriptionConsumer(AsyncWebsocketConsumer):
         self.nchunks = 0
         self.audio_buffer = b""
         self.full_transcript = ""   # Cumulative transcription
-        self.latest_transcript = ""  # Most recent transcription
+        self.prev_trancript = ""    # Look back for better attribute extraction
+        self.curr_transcript = ""  # Most recent transcription
         self.all_attributes = []     # Cumulative list of all attribute dictionaries
         self.current_attributes = {} # Cumulative current attribute dictionary
-        self.final_sweep_completed = False
         form = await sync_to_async(Form.objects.get)(id=formid)
 
         # Build the prompt to send to OpenAI
@@ -50,6 +41,8 @@ class TranscriptionConsumer(AsyncWebsocketConsumer):
                 })
 
         self.webm_header = None  # store the first valid chunk as header
+        self.final_sweep_completed = False
+
 
     async def disconnect(self, close_code):
         # On disconnect, if no final sweep was performed, send the current data
@@ -107,9 +100,10 @@ class TranscriptionConsumer(AsyncWebsocketConsumer):
 
                 transcription = await self.run_whisper_on_buffer(audio_data)
                 # Parse the transcription and extract attributes.
-                fixed_transcript, extracted_attributes = parseTranscribedText(transcription, self.current_attributes, self.template)
+                fixed_transcript, extracted_attributes = parseTranscribedText(self.prev_trancript, transcription, self.current_attributes, self.template)
                 # Update cumulative transcription.
-                self.latest_transcript = fixed_transcript
+                self.prev_trancript = self.curr_transcript
+                self.curr_transcript = fixed_transcript
                 self.full_transcript += fixed_transcript
 
                 # Append to the full history (if needed)
@@ -119,7 +113,7 @@ class TranscriptionConsumer(AsyncWebsocketConsumer):
 
                 # Send the latest transcription and cumulative current attributes.
                 await self.send(text_data=json.dumps({
-                    "corrected_audio": self.latest_transcript,
+                    "corrected_audio": self.prev_trancript + self.curr_transcript,
                     "attributes": self.current_attributes  # cumulative current attributes
                 }))
 
@@ -184,124 +178,6 @@ class TranscriptionConsumer(AsyncWebsocketConsumer):
         else:
             print(f"Error calling Whisper API: {response.status_code} {response.text}")
             return {"text": ""}
-
-@csrf_exempt
-def upload_audio(request, form_id):
-    if request.method == "POST" and request.FILES.get("audio"):
-        try:
-            audio_file = request.FILES["audio"]
-            file_path = default_storage.save(f"temp/{audio_file.name}", ContentFile(audio_file.read()))
-
-            wav_path = file_path.replace(".webm", ".wav")
-            ffmpeg.input(file_path).output(wav_path, format="wav", acodec="pcm_s16le", ac=1, ar="16000").run()
-            
-            result = model.transcribe(wav_path)
-            transcript = result["text"]
-            print("Transcript:", transcript)
-
-            extracted_data = extract_fields(transcript, form_id)
-            
-            os.remove(file_path)
-            os.remove(wav_path)
-
-            return JsonResponse({"transcript": transcript, "fields": extracted_data})
-
-        except Exception as e:
-            return JsonResponse({"error": f"Processing failed: {str(e)}"}, status=500)
-
-    return JsonResponse({"error": "Invalid request"}, status=400)
-
-def extract_fields(transcript, form_id):
-    """
-    Extracts values from the transcript using OpenAI's API.
-    If the AI is unsure about a field, it returns 'N/A'.
-    """
-
-    # Get the form structure (blocks and fields)
-    form = Form.objects.get(id=form_id)
-    
-    # Build the prompt to send to OpenAI
-    field_list = []
-    for block in form.blocks.all():
-        for field in block.fields.all():
-            field_list.append({"block_name": block.block_name, "field_name": field.field_name, "field_type": field.field_type})
-
-    prompt = f"""
-    You are an AI that extracts structured data from spoken text. The spoken text may be a conversation between a professional and a client, so ensure you extract the client's information for the data. 
-    Given the transcript and form fields below, extract relevant values. If a field is missing or unclear, return 'N/A'. Maintain structure.
-    If a particular field has an expected structure, try to match that structure with the extracted value if it exists. The transcript may have slightly incorrect pieces, so use the context to help you correct certain fields. Do not change fields that are correct.
-
-    Transcript:
-    "{transcript}"
-
-    Form Fields:
-    {json.dumps(field_list, indent=2)}
-
-    Return a JSON object in this format:
-    [
-        {{
-            "block_name": "Patient Information",
-            "fields": [
-                {{"field_name": "Full Name", "field_type": "text", "value": "John Doe"}},
-                {{"field_name": "Date of Birth", "field_type": "date", "value": "1990-01-12"}}
-            ]
-        }},
-        {{
-            "block_name": "Medical History",
-            "fields": [
-                {{"field_name": "Allergies", "field_type": "textarea", "value": "N/A"}},
-                {{"field_name": "Medications", "field_type": "textarea", "value": "N/A"}}
-            ]
-        }}
-    ]
-    """
-
-    try:
-        response = openai.chat.completions.create(
-            model="gpt-4",
-            messages=[
-                {"role": "system", "content": "You are a helpful assistant that extracts structured data."},
-                {"role": "user", "content": prompt}
-            ],
-            temperature=0.2
-        )
-
-        ai_response = response.choices[0].message.content
-
-        # Ensure valid JSON output
-        extracted_fields = json.loads(ai_response)
-
-        # Ensure that all fields in the form are present, adding "N/A" where necessary
-        structured_response = []
-        for block in form.blocks.all():
-            block_data = {"block_name": block.block_name, "fields": []}
-
-            for field in block.fields.all():
-                # Find field in AI response
-                found_field = next(
-                    (f for b in extracted_fields if b["block_name"] == block.block_name 
-                     for f in b["fields"] if f["field_name"] == field.field_name),
-                    None
-                )
-                # If AI didn't extract it, return "N/A"
-                extracted_value = found_field["value"] if found_field else "N/A"
-
-                block_data["fields"].append({
-                    "field_name": field.field_name,
-                    "field_type": field.field_type,
-                    "value": extracted_value
-                })
-
-            structured_response.append(block_data)
-
-        return structured_response
-
-    except json.JSONDecodeError:
-        print("Error: OpenAI API response could not be parsed as JSON.")
-        return []
-    except Exception as e:
-        print(f"Error with OpenAI API: {e}")
-        return []
 
 class FormDetailView(APIView):
     permission_classes = [IsAuthenticated]
