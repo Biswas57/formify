@@ -31,7 +31,7 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 DEBUG = False
 
 ALLOWED_HOSTS = [
-    "https://formify-yg3d.onrender.com",
+    "formify-yg3d.onrender.com",
     "localhost",
     "127.0.0.1",
 ]
