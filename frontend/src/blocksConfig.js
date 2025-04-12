@@ -37,4 +37,8 @@ export const blocksConfig = {
       "Debt Service Coverage Ratio",
     ],
   },
+  ClassNotes: {
+    label: "Class Notes",
+    fields: ["Class", "Topic", "Notes"],
+  },
 };

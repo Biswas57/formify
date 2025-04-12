@@ -1,31 +1,29 @@
 import os, json
 import whisper, ffmpeg, openai
 import tempfile, asyncio, requests
-from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
+from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.permissions import AllowAny
-from rest_framework.permissions import IsAuthenticated
-from rest_framework import status
-from .serializers import UserRegistrationSerializer, FormSerializer, FormDetailSerializer
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.contrib.auth.hashers import check_password
-from .models import Form, Block, Field
-from rest_framework.generics import RetrieveAPIView, ListAPIView
+from rest_framework.generics import ListAPIView
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from asgiref.sync import sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
-from .gpt_parse import parseTranscribedText, parseFinalAttributes
+from .models import Form
+from .groq_parse import parseTranscribedText, parseFinalAttributes
+from .serializers import UserRegistrationSerializer, FormSerializer, FormDetailSerializer
 
 MIN_CHUNK_NUM = 10
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 WHISPER_API_URL = "https://api.openai.com/v1/audio/transcriptions"
 
-client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+openai.api_key = OPENAI_API_KEY
 model = whisper.load_model("base")
 
 class TranscriptionConsumer(AsyncWebsocketConsumer):
@@ -259,7 +257,7 @@ def extract_fields(transcript, form_id):
     """
 
     try:
-        response = client.chat.completions.create(
+        response = openai.chat.completions.create(
             model="gpt-4",
             messages=[
                 {"role": "system", "content": "You are a helpful assistant that extracts structured data."},

@@ -9,7 +9,6 @@ from dotenv import load_dotenv, find_dotenv
 from pydantic import BaseModel
 
 # Set the OpenAI API key.
-OPENAI_KEY_API = os.getenv("OPENAI_API_KEY")
 openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # --------------------
