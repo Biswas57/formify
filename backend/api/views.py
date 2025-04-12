@@ -98,6 +98,8 @@ class TranscriptionConsumer(AsyncWebsocketConsumer):
                 if not self.check_webm_integrity(audio_data) and self.webm_header:
                     audio_data = self.webm_header + audio_data
 
+                # threading loop to ensure efficient gpt parsing 
+                # minimising effects of blocking functions
                 transcription = await self.run_whisper_on_buffer(audio_data)
                 loop = asyncio.get_event_loop()
                 fixed_transcript, extracted_attributes = await loop.run_in_executor(
@@ -107,7 +109,7 @@ class TranscriptionConsumer(AsyncWebsocketConsumer):
                     transcription,
                     self.current_attributes,
                     self.template
-    )
+                )
                 self.prev_trancript = self.curr_transcript
                 self.curr_transcript = fixed_transcript
                 self.full_transcript += fixed_transcript
