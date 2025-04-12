@@ -16,6 +16,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -24,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-po#8izij$*ai_57_d*8&%kqce*g+!j@1sxer0zp7&aiotdj0hb'
+SECRET_KEY = os.getenv("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -40,12 +41,12 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'daphne',
     'django.contrib.staticfiles',
     'channels',
     'rest_framework.authtoken',  # Handles token-based authentication
     'api',
     'corsheaders',
-    'daphne',
 ]
 
 MIDDLEWARE = [

@@ -1,42 +1,34 @@
-from django.contrib.auth import authenticate
+import os, json
+import whisper, ffmpeg, openai
+import tempfile, asyncio, requests
 from django.contrib.auth.models import User
+from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.permissions import AllowAny
-from rest_framework.permissions import IsAuthenticated
-from rest_framework import status
-from .serializers import UserRegistrationSerializer, FormSerializer, FormDetailSerializer
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.contrib.auth.hashers import check_password
-from .models import Form, Block, Field
-from rest_framework.generics import RetrieveAPIView, ListAPIView
-import os
-import json
-import whisper
-import ffmpeg
+from rest_framework.generics import ListAPIView
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
-import openai
 from asgiref.sync import sync_to_async
-
-import tempfile, asyncio
 from channels.generic.websocket import AsyncWebsocketConsumer
-from .groq_parse import parseTranscribedText
-import requests
+from .models import Form
+from .groq_parse import parseTranscribedText, parseFinalAttributes
+from .serializers import UserRegistrationSerializer, FormSerializer, FormDetailSerializer
 
 MIN_CHUNK_NUM = 10
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 WHISPER_API_URL = "https://api.openai.com/v1/audio/transcriptions"
 
-client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+openai.api_key = OPENAI_API_KEY
 model = whisper.load_model("base")
 
 class TranscriptionConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         formid = self.scope['url_route']['kwargs']['formid']
-        print(formid)
         await self.accept()
         self.nchunks = 0
         self.audio_buffer = b""
@@ -57,7 +49,6 @@ class TranscriptionConsumer(AsyncWebsocketConsumer):
                     "field_type": field.field_type
                 })
 
-        print(self.template)
         self.webm_header = None  # store the first valid chunk as header
 
     async def disconnect(self, close_code):
@@ -89,7 +80,7 @@ class TranscriptionConsumer(AsyncWebsocketConsumer):
         if bytes_data:
             if not self.template:
                 # Hard-coded template; ideally, load from your DB.
-                self.template = ["name", "to my left", "DOB", "Location", "Place of Birth"]
+                self.template = ["name", "DOB", "Location", "Place of Birth"]
 
             # Check if this incoming chunk has a valid WebM header signature.
             if self.webm_header is None and self.check_webm_integrity(bytes_data):
@@ -113,12 +104,10 @@ class TranscriptionConsumer(AsyncWebsocketConsumer):
                 audio_data = self.audio_buffer
                 if not self.check_webm_integrity(audio_data) and self.webm_header:
                     audio_data = self.webm_header + audio_data
-                    print("Prepended stored header to audio buffer.")
 
                 transcription = await self.run_whisper_on_buffer(audio_data)
                 # Parse the transcription and extract attributes.
-                fixed_transcript, extracted_attributes = parseTranscribedText(transcription, self.template)
-
+                fixed_transcript, extracted_attributes = parseTranscribedText(transcription, self.current_attributes, self.template)
                 # Update cumulative transcription.
                 self.latest_transcript = fixed_transcript
                 self.full_transcript += fixed_transcript
@@ -142,9 +131,10 @@ class TranscriptionConsumer(AsyncWebsocketConsumer):
         """
         Process the complete transcript to verify and correct the extracted attributes.
         """
+        # Retrieve the form instance
         form = await sync_to_async(Form.objects.get)(id=self.scope['url_route']['kwargs']['formid'])
         
-        # Build the field list for the prompt
+        # Build the candidate attributes list for the prompt
         field_list = []
         for block in await sync_to_async(list)(form.blocks.all()):
             for field in await sync_to_async(list)(block.fields.all()):
@@ -154,60 +144,13 @@ class TranscriptionConsumer(AsyncWebsocketConsumer):
                     "field_type": field.field_type,
                     "current_value": self.current_attributes.get(field.field_name, "N/A")
                 })
-
-        prompt = f"""
-        You are an AI that extracts and verifies structured data from spoken text. The spoken text may be a conversation between a professional and a client.
         
-        Below is a complete transcript and a list of form fields with their current values that were extracted incrementally.
-        Please verify these values against the complete transcript and correct any errors. 
-        Use the full context of the transcript to ensure accuracy.
+        # Call the final attribute extraction process asynchronously
+        final_attributes = await parseFinalAttributes(self.full_transcript, field_list)
+        print("Final sweep completed. Verified attributes:", final_attributes)
+        return final_attributes
         
-        If a particular field has a correct value, keep it as is. If it's incorrect or incomplete, provide the correct value.
-        If a field truly has no value in the transcript, return 'N/A'.
-
-        Transcript:
-        "{self.full_transcript}"
-
-        Current Form Fields with Values:
-        {json.dumps(field_list, indent=2)}
-
-        Return a JSON object that maps field names to their final verified values:
-        {{
-            "Field Name 1": "Verified Value 1",
-            "Field Name 2": "Verified Value 2",
-            ...
-        }}
-        """
-
-        try:
-            loop = asyncio.get_event_loop()
-            response = await loop.run_in_executor(
-                None,
-                lambda: client.chat.completions.create(
-                    model="gpt-4",
-                    messages=[
-                        {"role": "system", "content": "You are a helpful assistant that verifies and corrects extracted data."},
-                        {"role": "user", "content": prompt}
-                    ],
-                    temperature=0.2
-                )
-            )
-
-            ai_response = response.choices[0].message.content
-
-            # Ensure valid JSON output
-            verified_attributes = json.loads(ai_response)
-            
-            print("Final sweep completed. Verified attributes:", verified_attributes)
-            return verified_attributes
-
-        except json.JSONDecodeError:
-            print("Error: OpenAI API response could not be parsed as JSON.")
-            return self.current_attributes  # Return current attributes if parsing fails
-        except Exception as e:
-            print(f"Error with OpenAI API during final sweep: {e}")
-            return self.current_attributes  # Return current attributes if API call fails
-
+    
     def check_webm_integrity(self, audio_data):
         """
         Checks whether the audio_data starts with the minimal WebM EBML header signature.
@@ -236,7 +179,6 @@ class TranscriptionConsumer(AsyncWebsocketConsumer):
         with open(filename, "rb") as f:
             files = {"file": (filename, f, "audio/webm")}
             response = requests.post(WHISPER_API_URL, headers=headers, data=data, files=files)
-            print("Sending file with info:", files)
         if response.status_code == 200:
             return response.json()
         else:
@@ -315,7 +257,7 @@ def extract_fields(transcript, form_id):
     """
 
     try:
-        response = client.chat.completions.create(
+        response = openai.chat.completions.create(
             model="gpt-4",
             messages=[
                 {"role": "system", "content": "You are a helpful assistant that extracts structured data."},
