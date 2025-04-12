@@ -99,9 +99,15 @@ class TranscriptionConsumer(AsyncWebsocketConsumer):
                     audio_data = self.webm_header + audio_data
 
                 transcription = await self.run_whisper_on_buffer(audio_data)
-                # Parse the transcription and extract attributes.
-                fixed_transcript, extracted_attributes = parseTranscribedText(self.prev_trancript, transcription, self.current_attributes, self.template)
-                # Update cumulative transcription.
+                loop = asyncio.get_event_loop()
+                fixed_transcript, extracted_attributes = await loop.run_in_executor(
+                    None,
+                    parseTranscribedText,
+                    self.prev_trancript,
+                    transcription,
+                    self.current_attributes,
+                    self.template
+    )
                 self.prev_trancript = self.curr_transcript
                 self.curr_transcript = fixed_transcript
                 self.full_transcript += fixed_transcript
