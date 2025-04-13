@@ -117,7 +117,7 @@ export default function FormCreate() {
       const response = await fetch("https://formify-yg3d.onrender.com/api/auth/forms/create/", {
         method: "POST",
         headers: {
-          "Authorization": `Token ${getCookie("auth_token")}`,
+          Authorization: `Token ${getCookie("auth_token")}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify(payload),

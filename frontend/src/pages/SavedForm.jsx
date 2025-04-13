@@ -21,7 +21,7 @@ export default function SavedForm() {
         const response = await fetch(`https://formify-yg3d.onrender.com/api/auth/forms/${formId}/`, {
           method: "GET",
           headers: {
-            "Authorization": `Token ${getCookie("auth_token")}`,
+            Authorization: `Token ${getCookie("auth_token")}`,
             "Content-Type": "application/json",
           },
         });
