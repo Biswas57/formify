@@ -113,7 +113,7 @@ export default function Register() {
 
     try {
       const response = await axios.post(
-        "http://formify-yg3d.onrender.com/api/auth/register/",
+        "https://formify-yg3d.onrender.com/api/auth/register/",
         JSON.stringify({
           email: form.email,
           username: form.fullName,
