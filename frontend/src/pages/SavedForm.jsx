@@ -18,7 +18,7 @@ export default function SavedForm() {
   useEffect(() => {
     const fetchForm = async () => {
       try {
-        const response = await fetch(`http://127.0.0.1:8000/api/auth/forms/${formId}/`, {
+        const response = await fetch(`https://formify-yg3d.onrender.com/api/auth/forms/${formId}/`, {
           method: "GET",
           headers: {
             "Authorization": `Token ${getCookie("auth_token")}`,
@@ -49,7 +49,7 @@ export default function SavedForm() {
   return (
     <div className="max-w-6xl mx-auto">
       <h1 className="text-3xl font-bold mb-8">{form.form_name}</h1>
-      
+
       {/* Display Form Structure using FormPreview */}
       <div className="bg-white rounded-xl shadow-md p-6 border border-gray-100">
         <FormPreview blocks={form.blocks} />

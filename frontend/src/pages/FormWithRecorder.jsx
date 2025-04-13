@@ -30,7 +30,7 @@ function FormWithRecorder() {
     const fetchForm = async () => {
       try {
         const response = await fetch(
-          `http://127.0.0.1:8000/api/auth/forms/${formId}/`,
+          `https://formify-yg3d.onrender.com/api/auth/forms/${formId}/`,
           {
             method: "GET",
             headers: {
@@ -62,7 +62,7 @@ function FormWithRecorder() {
   // WebSocket connection setup
   useEffect(() => {
     const socket = new WebSocket(
-      `ws://localhost:8000/ws/transcription/${formId}/`
+      `ws://formify-yg3d.onrender.com/ws/transcription/${formId}/`
     );
     socket.binaryType = "arraybuffer";
     socket.onopen = () => {

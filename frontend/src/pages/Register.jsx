@@ -109,7 +109,7 @@ export default function Register() {
 
     try {
       const response = await axios.post(
-        "http://127.0.0.1:8000/api/auth/register/",
+        "http://formify-yg3d.onrender.com/api/auth/register/",
         JSON.stringify({
           email: form.email,
           username: form.fullName,
@@ -189,7 +189,7 @@ export default function Register() {
         loop
         muted
         className="absolute w-full h-full object-cover"
-        // style={{ filter: 'brightness(0.7)' }}
+      // style={{ filter: 'brightness(0.7)' }}
       >
         <source src="/videoplayback.mp4" type="video/mp4" />
       </video>
@@ -197,8 +197,8 @@ export default function Register() {
       {/* Content */}
       <div className="max-w-md w-full space-y-8 relative z-10">
         <div className="text-center">
-        <h1 className="text-6xl font-extrabold tracking-tight mb-2 bg-gradient-to-r from-blue-400 to-blue-600 text-transparent bg-clip-text italic pb-3">Formify</h1>
-        <h2 className="mt-6 text-2xl font-bold text-gray-900">Create your account</h2>
+          <h1 className="text-6xl font-extrabold tracking-tight mb-2 bg-gradient-to-r from-blue-400 to-blue-600 text-transparent bg-clip-text italic pb-3">Formify</h1>
+          <h2 className="mt-6 text-2xl font-bold text-gray-900">Create your account</h2>
           <p className="mt-2 text-sm text-gray-500">
             Already have an account?{" "}
             <Link to="/login" className="font-medium text-blue-600 hover:text-blue-500">

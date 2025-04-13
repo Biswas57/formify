@@ -29,7 +29,7 @@ export default function Login() {
 
     try {
       const response = await axios.post(
-        "http://127.0.0.1:8000/api/auth/login/",
+        "https://formify-yg3d.onrender.com/api/auth/login/",
         JSON.stringify(form),
         {
           headers: {
@@ -38,7 +38,7 @@ export default function Login() {
           withCredentials: true,
         }
       );
-      
+
       if (response.status === 200) {
         document.cookie = `auth_token=${response.data.token}; path=/`;
         toast.success('Successfully logged in!', {
@@ -106,7 +106,7 @@ export default function Login() {
         loop
         muted
         className="absolute w-full h-full object-cover"
-        // style={{ filter: 'brightness(0.7)' }}
+      // style={{ filter: 'brightness(0.7)' }}
       >
         <source src="/videoplayback.mp4" type="video/mp4" />
       </video>

@@ -34,7 +34,7 @@ export default function FormCreate() {
   const handleAddBlock = (blockType) => {
     // Log to see what we get from blocksConfig for the given blockType
     console.log("Adding block for type:", blockType, blocksConfig[blockType]);
-    
+
     // Check if the value is an object with a fields property
     let fieldsArray;
     if (blocksConfig[blockType] && Array.isArray(blocksConfig[blockType].fields)) {
@@ -48,7 +48,7 @@ export default function FormCreate() {
       );
       return;
     }
-    
+
     // Convert each field to an object.
     // If the field is a string, assign default field_type "TEXT".
     // If it's already an object, use its properties.
@@ -59,7 +59,7 @@ export default function FormCreate() {
         return { field_name: field.name, field_type: field.type };
       }
     });
-    
+
     const newBlock = {
       id: `block-${formBlocks.length + 1}`,
       type: blockType,
@@ -112,7 +112,7 @@ export default function FormCreate() {
     };
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/auth/forms/create/", {
+      const response = await fetch("https://formify-yg3d.onrender.com/api/auth/forms/create/", {
         method: "POST",
         headers: {
           "Authorization": `Token ${getCookie("auth_token")}`,
@@ -164,9 +164,8 @@ export default function FormCreate() {
         <button
           onClick={handleSave}
           disabled={saving}
-          className={`bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow-sm flex items-center transition-colors ${
-            saving ? "opacity-50 cursor-not-allowed" : ""
-          }`}
+          className={`bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow-sm flex items-center transition-colors ${saving ? "opacity-50 cursor-not-allowed" : ""
+            }`}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
