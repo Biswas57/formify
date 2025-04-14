@@ -127,7 +127,7 @@ export default function Register() {
       );
 
       if (response.status === 201) {
-        document.cookie = `auth_token=${response.data.token}; path=/`;
+        document.cookie = `auth_token=${response.data.token}; path=/; SameSite=None; Secure`;
         toast.success("Successfully registered!", {
           duration: 2000,
           position: "top-center",

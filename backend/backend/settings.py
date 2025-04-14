@@ -136,8 +136,8 @@ AUTH_PASSWORD_VALIDATORS = [
 # ✅ Allow React frontend to access the backend
 CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:5173",
-    "http://localhost:5173",  # Allow frontend
-    "https://formify-mu.vercel.app",
+    "http://localhost:5173",  
+    "https://formify-mu.vercel.app", # Allow frontend
 ]
 
 # ✅ Enable support for credentials (cookies, tokens)

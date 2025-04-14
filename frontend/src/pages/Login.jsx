@@ -43,7 +43,7 @@ export default function Login() {
       );
 
       if (response.status === 200) {
-        document.cookie = `auth_token=${response.data.token}; path=/`;
+        document.cookie = `auth_token=${response.data.token}; path=/; SameSite=None; Secure`;
         toast.success("Successfully logged in!", {
           duration: 2000,
           position: "top-center",
