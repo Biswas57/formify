@@ -68,6 +68,12 @@ Our next steps involve enabling users to create their own custom form building b
 
 Additionally, we're planning to improve the retrieval process for filled templates, making it seamless and intuitive for users to access, edit, and reuse their information whenever necessary. 
 
-Maybe even a darkmode
+Some other features we are considering include:
+- Darkmode
+- Implement create custom info blocks feauture
+- Implement delete and rename form
+- Change header to Formify with unique f logo
+- Allow recording even after stop recording button is pressed, change back state after turn on start recording (hard)
+- Allow redirection from login to dashboard if cookie already exists, and dashboard to login if no auth cookie exists, Fix redirection -> currently shows 404 errors when trying to access pages via the url directly.
 
 The goal is to continuously refine our app, ensuring that it stays simple and genuinely helpful. 
