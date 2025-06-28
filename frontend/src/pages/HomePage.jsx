@@ -1,25 +1,42 @@
-import { useState } from "react"
-import { Link } from "react-router-dom"
-import { Button } from "../components/ui/button"
-import { Card, CardDescription, CardHeader, CardTitle } from "../components/ui/card"
-import { Input } from "../components/ui/input"
-import { Badge } from "../components/ui/badge"
-import { Mic, Zap, Users, Shield, Clock, MessageSquare, ArrowRight, CheckCircle, Menu, X, Bell } from "lucide-react"
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import { Button } from "../components/ui/button";
+import {
+  Card,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
+import { Input } from "../components/ui/input";
+import { Badge } from "../components/ui/badge";
+import {
+  Mic,
+  Zap,
+  Users,
+  Shield,
+  Clock,
+  MessageSquare,
+  ArrowRight,
+  CheckCircle,
+  Menu,
+  X,
+  Bell,
+} from "lucide-react";
 
 export default function HomePage() {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const scrollToSection = (sectionId) => {
-    const element = document.getElementById(sectionId)
+    const element = document.getElementById(sectionId);
     if (element) {
       element.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start',
-      })
+        behavior: "smooth",
+        block: "start",
+      });
     }
     // Close mobile menu if open
-    setIsMobileMenuOpen(false)
-  }
+    setIsMobileMenuOpen(false);
+  };
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
       {/* Header */}
@@ -30,23 +47,23 @@ export default function HomePage() {
               Formify
             </span>
           </div>
-          
+
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-6 animate-fade-in-delay">
-            <button 
-              onClick={() => scrollToSection('about')} 
+            <button
+              onClick={() => scrollToSection("about")}
               className="text-slate-600 hover:text-blue-600 transition-colors duration-300 cursor-pointer"
             >
               About
             </button>
-            <button 
-              onClick={() => scrollToSection('features')} 
+            <button
+              onClick={() => scrollToSection("features")}
               className="text-slate-600 hover:text-blue-600 transition-colors duration-300 cursor-pointer"
             >
               Features
             </button>
-            <button 
-              onClick={() => scrollToSection('industries')} 
+            <button
+              onClick={() => scrollToSection("industries")}
               className="text-slate-600 hover:text-blue-600 transition-colors duration-300 cursor-pointer"
             >
               Industries
@@ -61,7 +78,10 @@ export default function HomePage() {
               </Button>
             </Link>
             <Link to="/register">
-              <Button size="sm" className="bg-blue-600 hover:bg-blue-700 hover:scale-105 transition-all duration-300">
+              <Button
+                size="sm"
+                className="bg-blue-600 hover:bg-blue-700 hover:scale-105 transition-all duration-300"
+              >
                 Get Started
               </Button>
             </Link>
@@ -73,7 +93,11 @@ export default function HomePage() {
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             aria-label="Toggle mobile menu"
           >
-            {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            {isMobileMenuOpen ? (
+              <X className="w-6 h-6" />
+            ) : (
+              <Menu className="w-6 h-6" />
+            )}
           </button>
         </div>
 
@@ -81,20 +105,20 @@ export default function HomePage() {
         {isMobileMenuOpen && (
           <div className="md:hidden border-t bg-white/95 backdrop-blur-sm">
             <div className="container mx-auto px-4 py-4 space-y-4">
-              <button 
-                onClick={() => scrollToSection('about')}
+              <button
+                onClick={() => scrollToSection("about")}
                 className="block w-full text-left text-slate-600 hover:text-blue-600 transition-colors duration-300 py-2"
               >
                 About
               </button>
-              <button 
-                onClick={() => scrollToSection('features')}
+              <button
+                onClick={() => scrollToSection("features")}
                 className="block w-full text-left text-slate-600 hover:text-blue-600 transition-colors duration-300 py-2"
               >
                 Features
               </button>
-              <button 
-                onClick={() => scrollToSection('industries')}
+              <button
+                onClick={() => scrollToSection("industries")}
                 className="block w-full text-left text-slate-600 hover:text-blue-600 transition-colors duration-300 py-2"
               >
                 Industries
@@ -234,16 +258,22 @@ export default function HomePage() {
 
         {/* Hero Content */}
         <div className="container mx-auto px-4 text-center relative z-10">
-          <Badge variant="secondary" className="mb-4 bg-blue-100 text-blue-800 border-blue-200 animate-bounce-in text-xs sm:text-sm">
+          <Badge
+            variant="secondary"
+            className="mb-4 bg-blue-100 text-blue-800 border-blue-200 animate-bounce-in text-xs sm:text-sm"
+          >
             Voice-Powered Form Filling
           </Badge>
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 mb-6 leading-tight animate-fade-up">
             Transform Speech into
-            <span className="text-blue-600 block animate-fade-up-delay">Structured Data</span>
+            <span className="text-blue-600 block animate-fade-up-delay">
+              Structured Data
+            </span>
           </h1>
           <p className="text-lg sm:text-xl text-slate-600 mb-8 max-w-3xl mx-auto leading-relaxed animate-fade-up-delay-2 px-4">
-            Formify streamlines form-filling by converting speech to text in real time. Eliminate manual data entry and
-            connect more deeply with your clients through focused, genuine conversations.
+            Formify streamlines form-filling by converting speech to text in
+            real time. Eliminate manual data entry and connect more deeply with
+            your clients through focused, genuine conversations.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12 animate-fade-up-delay-3 px-4">
             <Link to="/register" className="w-full sm:w-auto">
@@ -251,7 +281,7 @@ export default function HomePage() {
                 size="lg"
                 className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-base sm:text-lg px-6 sm:px-8 py-3 hover:scale-105 transition-all duration-300 group"
               >
-                Start Free Trial
+                Get Started
                 <ArrowRight className="ml-2 w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform duration-300" />
               </Button>
             </Link>
@@ -299,8 +329,10 @@ export default function HomePage() {
                 Eliminate Manual Data Entry Forever
               </h2>
               <p className="text-base sm:text-lg text-slate-600 mb-6 leading-relaxed">
-                Formify transforms tedious, manual form-filling and helps professionals connect more deeply with their
-                clients through focused and genuine conversations that truly capture every detail.
+                Formify transforms tedious, manual form-filling and helps
+                professionals connect more deeply with their clients through
+                focused and genuine conversations that truly capture every
+                detail.
               </p>
               <div className="space-y-4">
                 <div className="flex items-start gap-3 animate-fade-in-up group">
@@ -310,7 +342,8 @@ export default function HomePage() {
                       Real-Time Audio Analysis
                     </h3>
                     <p className="text-slate-600">
-                      Advanced algorithms process speech patterns and context in real-time
+                      Advanced algorithms process speech patterns and context in
+                      real-time
                     </p>
                   </div>
                 </div>
@@ -321,7 +354,8 @@ export default function HomePage() {
                       Structured Data Mapping
                     </h3>
                     <p className="text-slate-600">
-                      Intelligent field mapping ensures information goes exactly where it belongs
+                      Intelligent field mapping ensures information goes exactly
+                      where it belongs
                     </p>
                   </div>
                 </div>
@@ -331,7 +365,10 @@ export default function HomePage() {
                     <h3 className="font-semibold text-slate-900 group-hover:text-blue-600 transition-colors duration-300">
                       Effortless Client Interactions
                     </h3>
-                    <p className="text-slate-600">Focus on your clients while technology handles the paperwork</p>
+                    <p className="text-slate-600">
+                      Focus on your clients while technology handles the
+                      paperwork
+                    </p>
                   </div>
                 </div>
               </div>
@@ -361,13 +398,17 @@ export default function HomePage() {
                 <div className="space-y-4">
                   {/* Form Title */}
                   <div className="border-b border-slate-200 pb-4 mb-6">
-                    <h3 className="text-lg font-semibold text-slate-800 mb-1">Form Title</h3>
+                    <h3 className="text-lg font-semibold text-slate-800 mb-1">
+                      Form Title
+                    </h3>
                     <h4 className="text-blue-600 font-medium">John's Form</h4>
                   </div>
 
                   {/* Name Field */}
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-slate-700">Name</label>
+                    <label className="text-sm font-medium text-slate-700">
+                      Name
+                    </label>
                     <div className="border border-slate-200 rounded p-3 h-10 flex items-center bg-slate-50 relative">
                       <span className="text-sm text-slate-700 animate-typing-1 overflow-hidden whitespace-nowrap">
                         John Smith
@@ -381,7 +422,9 @@ export default function HomePage() {
 
                   {/* Email Field */}
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-slate-700">Email</label>
+                    <label className="text-sm font-medium text-slate-700">
+                      Email
+                    </label>
                     <div className="border border-slate-200 rounded p-3 h-10 flex items-center bg-slate-50 relative">
                       <span className="text-sm text-slate-700 animate-typing-2 overflow-hidden whitespace-nowrap">
                         john.smith@company.com
@@ -395,7 +438,9 @@ export default function HomePage() {
 
                   {/* Phone Number Field */}
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-slate-700">Phone Number</label>
+                    <label className="text-sm font-medium text-slate-700">
+                      Phone Number
+                    </label>
                     <div className="border border-slate-200 rounded p-3 h-10 flex items-center bg-slate-50 relative">
                       <span className="text-sm text-slate-700 animate-typing-3 overflow-hidden whitespace-nowrap">
                         (555) 123-4567
@@ -409,7 +454,9 @@ export default function HomePage() {
 
                   {/* Address Field */}
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-slate-700">Address</label>
+                    <label className="text-sm font-medium text-slate-700">
+                      Address
+                    </label>
                     <div className="border border-slate-200 rounded p-3 h-10 flex items-center bg-slate-50 relative">
                       <span className="text-sm text-slate-700 animate-typing-4 overflow-hidden whitespace-nowrap">
                         123 Main Street, New York, NY
@@ -423,7 +470,9 @@ export default function HomePage() {
 
                   {/* Occupation Field */}
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-slate-700">Occupation</label>
+                    <label className="text-sm font-medium text-slate-700">
+                      Occupation
+                    </label>
                     <div className="border border-slate-200 rounded p-3 h-10 flex items-center justify-between bg-slate-50 relative">
                       <span className="text-sm text-slate-700 animate-typing-5 overflow-hidden whitespace-nowrap">
                         Healthcare Professional
@@ -460,7 +509,8 @@ export default function HomePage() {
               Powerful Features for Modern Professionals
             </h2>
             <p className="text-lg sm:text-xl text-slate-600 max-w-2xl mx-auto px-4">
-              Advanced technology that transforms how you capture and structure client information
+              Advanced technology that transforms how you capture and structure
+              client information
             </p>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
@@ -473,7 +523,8 @@ export default function HomePage() {
                   Real-Time Speech Recognition
                 </CardTitle>
                 <CardDescription>
-                  Advanced voice processing converts natural speech to structured text instantly
+                  Advanced voice processing converts natural speech to
+                  structured text instantly
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -486,7 +537,8 @@ export default function HomePage() {
                   WebSocket Integration
                 </CardTitle>
                 <CardDescription>
-                  Lightning-fast real-time connections ensure seamless data flow and instant updates
+                  Lightning-fast real-time connections ensure seamless data flow
+                  and instant updates
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -499,7 +551,8 @@ export default function HomePage() {
                   Natural Dialogue Mapping
                 </CardTitle>
                 <CardDescription>
-                  Intelligent algorithms map conversational speech into structured form fields automatically
+                  Intelligent algorithms map conversational speech into
+                  structured form fields automatically
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -512,7 +565,8 @@ export default function HomePage() {
                   Client-Focused Interactions
                 </CardTitle>
                 <CardDescription>
-                  Maintain eye contact and genuine connections while forms fill themselves
+                  Maintain eye contact and genuine connections while forms fill
+                  themselves
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -525,7 +579,8 @@ export default function HomePage() {
                   Enterprise Security
                 </CardTitle>
                 <CardDescription>
-                  HIPAA compliant with end-to-end encryption for sensitive professional data
+                  HIPAA compliant with end-to-end encryption for sensitive
+                  professional data
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -537,7 +592,10 @@ export default function HomePage() {
                 <CardTitle className="group-hover:text-blue-600 transition-colors duration-300">
                   Custom Form Builder
                 </CardTitle>
-                <CardDescription>Create tailored forms for any industry with drag-and-drop simplicity</CardDescription>
+                <CardDescription>
+                  Create tailored forms for any industry with drag-and-drop
+                  simplicity
+                </CardDescription>
               </CardHeader>
             </Card>
           </div>
@@ -552,7 +610,8 @@ export default function HomePage() {
               Trusted by Professionals Across Industries
             </h2>
             <p className="text-lg sm:text-xl text-slate-600 max-w-2xl mx-auto px-4">
-              From healthcare to finance, Formify adapts to your industry's unique needs
+              From healthcare to finance, Formify adapts to your industry's
+              unique needs
             </p>
           </div>
 
@@ -566,10 +625,13 @@ export default function HomePage() {
                     <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
                       <Bell className="w-5 h-5 text-orange-600" />
                     </div>
-                    <h3 className="text-lg font-semibold text-slate-900">Legal</h3>
+                    <h3 className="text-lg font-semibold text-slate-900">
+                      Legal
+                    </h3>
                   </div>
                   <p className="text-slate-600 text-sm mb-6">
-                    Client intake, case documentation, and consultation records with security
+                    Client intake, case documentation, and consultation records
+                    with security
                   </p>
                   <div className="space-y-3">
                     <div className="bg-orange-50 rounded-lg p-2 mb-4">
@@ -595,10 +657,13 @@ export default function HomePage() {
                     <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
                       <MessageSquare className="w-5 h-5 text-purple-600" />
                     </div>
-                    <h3 className="text-lg font-semibold text-slate-900">Education</h3>
+                    <h3 className="text-lg font-semibold text-slate-900">
+                      Education
+                    </h3>
                   </div>
                   <p className="text-slate-600 text-sm mb-6">
-                    Student assessments, parent conferences, and administrative documentation
+                    Student assessments, parent conferences, and administrative
+                    documentation
                   </p>
                   <div className="space-y-3">
                     <div className="h-2 bg-slate-200 rounded w-full"></div>
@@ -626,10 +691,13 @@ export default function HomePage() {
                     <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
                       <Users className="w-5 h-5 text-green-600" />
                     </div>
-                    <h3 className="text-lg font-semibold text-slate-900">Finance</h3>
+                    <h3 className="text-lg font-semibold text-slate-900">
+                      Finance
+                    </h3>
                   </div>
                   <p className="text-slate-600 text-sm mb-6">
-                    Client onboarding, risk assessments, and financial planning documentation
+                    Client onboarding, risk assessments, and financial planning
+                    documentation
                   </p>
                   <div className="space-y-3">
                     <div className="h-2 bg-slate-200 rounded w-full"></div>
@@ -651,10 +719,13 @@ export default function HomePage() {
                     <div className="w-8 h-8 bg-cyan-100 rounded-full flex items-center justify-center">
                       <Shield className="w-5 h-5 text-cyan-600" />
                     </div>
-                    <h3 className="text-lg font-semibold text-slate-900">Healthcare</h3>
+                    <h3 className="text-lg font-semibold text-slate-900">
+                      Healthcare
+                    </h3>
                   </div>
                   <p className="text-slate-600 text-sm mb-6">
-                    Patient intake, medical histories, and consultation notes with HIPAA compliance
+                    Patient intake, medical histories, and consultation notes
+                    with HIPAA compliance
                   </p>
                   <div className="space-y-3">
                     <div className="h-2 bg-slate-200 rounded w-full"></div>
@@ -684,29 +755,29 @@ export default function HomePage() {
             Ready to Transform Your Form-Filling Process?
           </h2>
           <p className="text-lg sm:text-xl text-slate-600 mb-8 max-w-2xl mx-auto px-4">
-            Join thousands of professionals who have eliminated manual data entry and improved client relationships with
-            Formify.
+            Join thousands of professionals who have eliminated manual data
+            entry and improved client relationships with Formify.
           </p>
           <div className="max-w-md mx-auto mb-8 animate-slide-up px-4">
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-2">
-              <Input
-                type="email"
-                placeholder="Enter your work email"
-                className="flex-1 focus:border-blue-600 transition-colors duration-300"
-              />
-              <Link to="/register" className="w-full sm:w-auto">
-                <Button className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 hover:scale-105 transition-all duration-300 whitespace-nowrap">
-                  Get Started
-                </Button>
-              </Link>
-            </div>
-            <p className="text-sm text-slate-500 mt-2">Start your free trial today. No credit card required.</p>
+            <Link to="/register" className="w-full sm:w-auto">
+              <Button className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 hover:scale-105 transition-all duration-300 whitespace-nowrap">
+                Get Started
+              </Button>
+            </Link>
           </div>
           <div className="flex flex-col sm:flex-row flex-wrap justify-center gap-4 sm:gap-8 text-sm text-slate-500 animate-fade-up-delay px-4">
-            <span className="hover:text-blue-600 transition-colors duration-300">✓ 14-day free trial</span>
-            <span className="hover:text-blue-600 transition-colors duration-300">✓ No setup fees</span>
-            <span className="hover:text-blue-600 transition-colors duration-300">✓ Cancel anytime</span>
-            <span className="hover:text-blue-600 transition-colors duration-300">✓ 24/7 support</span>
+            <span className="hover:text-blue-600 transition-colors duration-300">
+              ✓ 14-day free trial
+            </span>
+            <span className="hover:text-blue-600 transition-colors duration-300">
+              ✓ No setup fees
+            </span>
+            <span className="hover:text-blue-600 transition-colors duration-300">
+              ✓ Cancel anytime
+            </span>
+            <span className="hover:text-blue-600 transition-colors duration-300">
+              ✓ 24/7 support
+            </span>
           </div>
         </div>
       </section>
@@ -721,28 +792,42 @@ export default function HomePage() {
                   Formify
                 </span>
               </div>
-              <p className="text-slate-400 mb-4">Voice-powered form filling for modern professionals.</p>
+              <p className="text-slate-400 mb-4">
+                Voice-powered form filling for modern professionals.
+              </p>
             </div>
             <div className="animate-fade-in-delay">
               <h3 className="font-semibold mb-4">Product</h3>
               <ul className="space-y-2 text-slate-400">
                 <li>
-                  <a href="#" className="hover:text-blue-400 transition-colors duration-300">
+                  <a
+                    href="#"
+                    className="hover:text-blue-400 transition-colors duration-300"
+                  >
                     Features
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-blue-400 transition-colors duration-300">
+                  <a
+                    href="#"
+                    className="hover:text-blue-400 transition-colors duration-300"
+                  >
                     Pricing
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-blue-400 transition-colors duration-300">
+                  <a
+                    href="#"
+                    className="hover:text-blue-400 transition-colors duration-300"
+                  >
                     Security
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-blue-400 transition-colors duration-300">
+                  <a
+                    href="#"
+                    className="hover:text-blue-400 transition-colors duration-300"
+                  >
                     Integrations
                   </a>
                 </li>
@@ -752,22 +837,34 @@ export default function HomePage() {
               <h3 className="font-semibold mb-4">Company</h3>
               <ul className="space-y-2 text-slate-400">
                 <li>
-                  <a href="#" className="hover:text-blue-400 transition-colors duration-300">
+                  <a
+                    href="#"
+                    className="hover:text-blue-400 transition-colors duration-300"
+                  >
                     About
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-blue-400 transition-colors duration-300">
+                  <a
+                    href="#"
+                    className="hover:text-blue-400 transition-colors duration-300"
+                  >
                     Blog
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-blue-400 transition-colors duration-300">
+                  <a
+                    href="#"
+                    className="hover:text-blue-400 transition-colors duration-300"
+                  >
                     Careers
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-blue-400 transition-colors duration-300">
+                  <a
+                    href="#"
+                    className="hover:text-blue-400 transition-colors duration-300"
+                  >
                     Contact
                   </a>
                 </li>
@@ -777,44 +874,67 @@ export default function HomePage() {
               <h3 className="font-semibold mb-4">Support</h3>
               <ul className="space-y-2 text-slate-400">
                 <li>
-                  <a href="#" className="hover:text-blue-400 transition-colors duration-300">
+                  <a
+                    href="#"
+                    className="hover:text-blue-400 transition-colors duration-300"
+                  >
                     Help Center
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-blue-400 transition-colors duration-300">
+                  <a
+                    href="#"
+                    className="hover:text-blue-400 transition-colors duration-300"
+                  >
                     Documentation
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-blue-400 transition-colors duration-300">
+                  <a
+                    href="#"
+                    className="hover:text-blue-400 transition-colors duration-300"
+                  >
                     API Reference
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-blue-400 transition-colors duration-300">
+                  <a
+                    href="#"
+                    className="hover:text-blue-400 transition-colors duration-300"
+                  >
                     Status
                   </a>
                 </li>
               </ul>
             </div>
           </div>
-                      <div className="border-t border-slate-800 mt-6 sm:mt-8 pt-6 sm:pt-8 flex flex-col md:flex-row justify-between items-center animate-fade-up">
-              <p className="text-slate-400 text-sm">© 2024 Formify. All rights reserved.</p>
-              <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 text-sm text-slate-400 mt-4 md:mt-0">
-                <a href="#" className="hover:text-blue-400 transition-colors duration-300 text-center sm:text-left">
-                  Privacy Policy
-                </a>
-                <a href="#" className="hover:text-blue-400 transition-colors duration-300 text-center sm:text-left">
-                  Terms of Service
-                </a>
-                <a href="#" className="hover:text-blue-400 transition-colors duration-300 text-center sm:text-left">
-                  Cookie Policy
-                </a>
-              </div>
+          <div className="border-t border-slate-800 mt-6 sm:mt-8 pt-6 sm:pt-8 flex flex-col md:flex-row justify-between items-center animate-fade-up">
+            <p className="text-slate-400 text-sm">
+              © 2025 Formify. All rights reserved.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 text-sm text-slate-400 mt-4 md:mt-0">
+              <a
+                href="#"
+                className="hover:text-blue-400 transition-colors duration-300 text-center sm:text-left"
+              >
+                Privacy Policy
+              </a>
+              <a
+                href="#"
+                className="hover:text-blue-400 transition-colors duration-300 text-center sm:text-left"
+              >
+                Terms of Service
+              </a>
+              <a
+                href="#"
+                className="hover:text-blue-400 transition-colors duration-300 text-center sm:text-left"
+              >
+                Cookie Policy
+              </a>
             </div>
+          </div>
         </div>
       </footer>
     </div>
-  )
-} 
+  );
+}
