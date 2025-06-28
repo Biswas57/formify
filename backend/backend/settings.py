@@ -16,6 +16,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -27,10 +28,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv("DEBUG", "False") == "True"
+DEBUG = False
 
-
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", "unihack-2025.onrender.com"]
+ALLOWED_HOSTS = [
+    "formify-yg3d.onrender.com",
+    "localhost",
+    "127.0.0.1",
+]
 
 
 # Application definition
@@ -41,16 +45,15 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'daphne',
     'django.contrib.staticfiles',
     'channels',
     'rest_framework.authtoken',  # Handles token-based authentication
     'api',
     'corsheaders',
-    'daphne',
 ]
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -58,7 +61,9 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
+    'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
 
@@ -130,14 +135,11 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # ✅ Allow React frontend to access the backend
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",  
     "http://127.0.0.1:5173",
-    "https://unihack-2025-iota.vercel.app",
-    # Allow frontend
+    "http://localhost:5173",  
+    "https://formify-mu.vercel.app", # Allow frontend
 ]
 
-# # (Optional) If unsure of the origin, temporarily allow all
-# CORS_ALLOW_ALL_ORIGINS = True  # Only use for debugging, NOT in production
 # ✅ Enable support for credentials (cookies, tokens)
 CORS_ALLOW_CREDENTIALS = True
 

@@ -1,21 +1,18 @@
-import time
-import math
 import json
+import os
 from typing import List, Dict, Any
 from groq import Groq
 from pydantic import BaseModel
 
 # Create a global Groq client and usage counter.
 client = Groq(
-    api_key="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"
+    api_key=os.getenv("GROQ_API_KEY")
 )
-totalUsage = 0
-
 # --------------------
 # 1) Pydantic Models
 # --------------------
 class TranscriptionRevisionResponse(BaseModel):
-    """Model for step 2.5 - Correcting or refining the transcription."""
+    """Model for step 2 - Correcting or refining the transcription."""
     correctedText: str
 
 class AttributeExtractionResponse(BaseModel):
@@ -24,28 +21,31 @@ class AttributeExtractionResponse(BaseModel):
     The 'parsedAttributes' field is a dictionary of { attribute_name: extracted_value }.
     """
     parsedAttributes: Dict[str, str]
+    
+class FinalAttributeExtractionResponse(BaseModel):
+    """
+    Model for final attribute selection.
+    The 'finalAttributes' field is a dictionary of { attribute_name: final_selected_value }.
+    """
+    finalAttributes: Dict[str, str]
 
 # --------------------
 # 2) Step 2: Revise Transcribed Text
 # --------------------
-def reviseTranscription(rawText: str) -> tuple[str, int]:
+def reviseTranscription(rawText: str) -> str:
     """
-    Takes the raw transcribed text (possibly with errors) and uses GPT via Groq to refine it.
-    Returns the corrected transcription and the token usage for this request.
+    Takes the raw transcribed text (possibly with errors) and uses GPT to refine it.
+    Returns the corrected transcription.
     """
-    global totalUsage
-
     systemMessage = """
-You are a transcription editor. The user has provided transcribed text that may contain errors.
-Your job is to correct these errors for clarity and accuracy, preserving the original meaning.
-Return the corrected text as a JSON object with the key "correctedText".
+You are a transcription editor working in a professional, Australian context where meetings often involve topics 
+in finance, healthcare, or social work and human resources. The user has provided transcribed text that may contain errors. 
+Your job is to correct these errors for clarity and accuracy while preserving the original meaning 
+and the formal tone expected in these settings. Return the corrected text as a JSON object with the key "correctedText". 
 Do not include any markdown formatting, code fences, or extra characters; return pure JSON.
-    """
-
-    start_time = time.time()
-    # Use Groq's completions.create method.
+"""
     completion = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",  # Adjust model as needed
+        model="llama-3.3-70b-versatile",
         messages=[
             {"role": "system", "content": systemMessage},
             {"role": "user", "content": rawText},
@@ -53,55 +53,42 @@ Do not include any markdown formatting, code fences, or extra characters; return
         max_tokens=100,
         temperature=0.0,
     )
-    end_time = time.time()
-    elapsed_time = end_time - start_time
-
-    # Using dot notation to access response attributes.
-    usage = completion.usage.total_tokens
-    totalUsage += usage
-
     response_text = completion.choices[0].message.content
-    
     try:
-        # Parse the JSON string into our Pydantic model.
         parsed_response = TranscriptionRevisionResponse.parse_raw(response_text)
     except Exception as e:
         print("Error parsing JSON in reviseTranscription:", e)
-        # Fallback: use the raw response text.
         parsed_response = TranscriptionRevisionResponse(correctedText=response_text)
-    
-    print(f"\n[{elapsed_time:.2f}s] reviseTranscription -> Usage: {usage}, Total Usage: {totalUsage}, "
-          f"Cost: ${round(0.15/1e6 * totalUsage, 5)}")
-    print("\nRevision Response:", parsed_response)
-    
-    return parsed_response.correctedText, usage
+    return parsed_response.correctedText
 
 # --------------------
 # 3) Step 3: Extract/Revise Attributes into JSON
 # --------------------
-def extractAttributesFromText(correctedText: str, templateAttributes: List[str]) -> tuple[Dict[str, str], int]:
+def extractAttributesFromText(correctedText: str, currentAttributes: dict, templateAttributes: List[str]) -> Dict[str, str]:
     """
-    Takes the refined transcription and a list of attribute names.
-    Uses Groq to find the best value for each attribute within the text.
-    Returns a dictionary of { attribute: value } and the token usage.
+    Takes the refined transcription, the current recorded attributes, and a list of attribute names.
+    Uses GPT to compare the values found in the corrected transcription with the current recorded values.
+    If the transcription contains a more accurate or contextually appropriate value for an attribute, it should replace the current value.
+    Returns a dictionary of { attribute: value } as a JSON object with the key "parsedAttributes".
     """
-    global totalUsage
-
     systemMessage = f"""
-You are an attribute extraction assistant. 
-Given a corrected transcription and a list of attributes, 
-find if any of the attributes have a relevant value present in the text and store them.
-If an attribute cannot be found, do not add that attribute to the result.
-If an attribute appears multiple times record the most suitable record 
-Return your result as a JSON object with the key "parsedAttributes" 
-where each attribute maps to its value.
-Do not include any markdown formatting, code fences, or extra characters; return pure JSON.
+You are an attribute extraction assistant specialized for an Australian environment.
+This tool is used primarily in Finance, Healthcare, Social Work, and Human Resource contexts.
+You are provided with:
+1. A corrected transcription of a meeting.
+2. A list of attributes to extract.
+3. The current recorded attribute values.
+For each attribute:
+- If the transcription contains a value that is more accurate or contextually appropriate than the current recorded value, return the new value.
+- If the current recorded value is more suitable, retain it.
+- If no relevant value is found in the transcription, do not include that attribute in your result.
+Return your result as a pure JSON object with the key "parsedAttributes" mapping each attribute to its final selected value.
+Do not include any markdown formatting, code fences, or extra characters.
 Attributes to find: {templateAttributes}
-    """
-
-    start_time = time.time()
+Current Recorded Attributes: {json.dumps(currentAttributes, indent=2)}
+"""
     completion = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
+        model="llama-3.3-70b-versatile", 
         messages=[
             {"role": "system", "content": systemMessage},
             {"role": "user", "content": correctedText},
@@ -109,84 +96,82 @@ Attributes to find: {templateAttributes}
         max_tokens=200,
         temperature=0.0,
     )
-    end_time = time.time()
-    elapsed_time = end_time - start_time
-
-    usage = completion.usage.total_tokens
-    totalUsage += usage
-
     response_text = completion.choices[0].message.content
-    
     try:
         parsed_response = AttributeExtractionResponse.parse_raw(response_text)
     except Exception as e:
         print("Error parsing JSON in extractAttributesFromText:", e)
         parsed_response = AttributeExtractionResponse(parsedAttributes={})
-    
-    print(f"\n[{elapsed_time:.2f}s] extractAttributesFromText -> Usage: {usage}, Total Usage: {totalUsage}, "
-          f"Cost: ${round(0.15/1e6 * totalUsage, 5)}")
-    print("\nExtraction Response:", parsed_response)
-    
-    return parsed_response.parsedAttributes, usage
-
-
-def parseFullTranscriptandAttributes(fullTranscript: str, collectedAttributes: list[dict]) -> dict:
-    """
-    Given the full transcript and a list of attribute dictionaries extracted
-    over multiple rounds, determine the most relevant value for each attribute.
-    The method works by:
-      1. Collecting all candidate values for each attribute.
-      2. Counting how often each candidate appears.
-      3. Preferring the candidate that occurs most frequently and ensuring it is
-         mentioned in the full transcript.
-    Returns a dictionary mapping attribute names to their selected values.
-    """
-    final_attributes = {}
-    candidate_values = {}
-
-    # Gather all candidate values from each dictionary
-    for attr_dict in collectedAttributes:
-        for key, value in attr_dict.items():
-            if key not in candidate_values:
-                candidate_values[key] = []
-            candidate_values[key].append(value)
-
-    # For each attribute, select the candidate that is most frequent
-    for key, values in candidate_values.items():
-        # Count frequency of each candidate value.
-        freq = {}
-        for value in values:
-            freq[value] = freq.get(value, 0) + 1
-
-        # Choose candidate with highest frequency.
-        best_candidate = max(freq.items(), key=lambda x: x[1])[0]
-
-        final_attributes[key] = best_candidate
-
-    return final_attributes
-
+    return parsed_response.parsedAttributes
 
 # --------------------
-# 4) Orchestrator: Steps 2–6
+# 4) Final Attribute Extraction (Asynchronous)
 # --------------------
-def parseTranscribedText(transcribedText: str, templateAttributes: List[str]):
+async def parseFinalAttributes(fullTranscript: str, candidateAttributes: list[dict]) -> dict:
+    """
+    Given the full transcript and a list of candidate attribute dictionaries extracted over multiple rounds,
+    use the OpenAI API to determine the most appropriate value for each attribute based on the transcript context.
+    Returns a dictionary mapping each attribute name to its final selected value.
+    """
+    system_message = f"""
+You are an attribute extraction revision assistant designed to verify and correct structured data extracted from spoken text. 
+You are provided with a complete transcript of a meeting (or conversation between a professional and a client) and 
+a list of candidate attribute dictionaries representing form fields and their current extracted values.
+
+Your task is to carefully review the transcript and determine the final, most appropriate value for each attribute. For each field:
+- If the current value is correct, keep it.
+- If it is incorrect, inconsistent, or incomplete, provide the most correct value.
+- If no valid information exists in the transcript for a field, return 'N/A'.
+
+Return your result as a pure JSON object with a single key "finalAttributes" mapping each field name to its final verified value.
+Do not include any markdown formatting, code fences, or extra characters.
+
+Transcript:
+{fullTranscript}
+
+Candidate Attributes:
+{json.dumps(candidateAttributes, indent=2)}
+"""
+    try:
+        loop = asyncio.get_event_loop()
+        response = await loop.run_in_executor(
+            None,
+            lambda: client.chat.completions.create(
+                model="llama-3.3-70b-versatile",
+                messages=[
+                    {"role": "system", "content": system_message}
+                ],
+                temperature=0.0,
+                max_tokens=1000
+            )
+        )
+        response_text = response.choices[0].message.content
+        parsed_response = FinalAttributeExtractionResponse.parse_raw(response_text)
+        verified_attributes = parsed_response.finalAttributes
+        return verified_attributes
+    except json.JSONDecodeError as e:
+        print("JSON decode error during final sweep:", e)
+    except Exception as e:
+        print("Error during final sweep with OpenAI API:", e)
+    fallback_attributes = {attr["field_name"]: attr["current_value"] for attr in candidateAttributes}
+    return fallback_attributes
+
+# --------------------
+# 5) Orchestrator: Steps 2–6
+# --------------------
+def parseTranscribedText(transcribedText: str, currentAttributes: dict, templateAttributes: List[str]):
     """
     High-level function that:
-    (1) Revises the transcription (Step 2.5).
+    (1) Revises the transcription (Step 2).
     (2) Extracts attribute values into a JSON structure (Steps 3 & 4).
-    (3) Returns the final JSON object with the found attributes (Step 6).
-    
+    (3) Returns the final JSON object with the found attributes (Step 5).
+    (4) Revise final full transcript (Step 6) if needed.
     In your actual flow, you might convert this JSON to PDF.
     """
-    # Step 2.5: Revise the transcription.
-    correctedText, _ = reviseTranscription(transcribedText)
+    # Step 2: Revise the transcription.
+    correctedText = reviseTranscription(transcribedText)
     
-    # Step 3 & 4: Extract attributes and fill JSON.
-    parsedAttributes, _ = extractAttributesFromText(correctedText, templateAttributes)
+    # Step 3 & 4: Extract attributes.
+    parsedAttributes = extractAttributesFromText(correctedText, currentAttributes, templateAttributes)
     
-    # Step 6: Return final JSON.
     return correctedText, parsedAttributes
-    # return {
-    #     "correctedText": correctedText,
-    #     "attributes": parsedAttributes
-    # }

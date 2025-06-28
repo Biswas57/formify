@@ -114,17 +114,14 @@ export default function FormCreate() {
     };
 
     try {
-      const response = await fetch(
-        "https://unihack-2025.onrender.com/api/auth/forms/create/",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Token ${getCookie("auth_token")}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(payload),
-        }
-      );
+      const response = await fetch("https://formify-yg3d.onrender.com/api/auth/forms/create/", {
+        method: "POST",
+        headers: {
+          Authorization: `Token ${getCookie("auth_token")}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
 
       if (!response.ok) {
         throw new Error("Failed to save form.");
@@ -169,9 +166,8 @@ export default function FormCreate() {
         <button
           onClick={handleSave}
           disabled={saving}
-          className={`bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow-sm flex items-center transition-colors ${
-            saving ? "opacity-50 cursor-not-allowed" : ""
-          }`}
+          className={`bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow-sm flex items-center transition-colors ${saving ? "opacity-50 cursor-not-allowed" : ""
+            }`}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"

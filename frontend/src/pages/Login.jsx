@@ -32,7 +32,7 @@ export default function Login() {
 
     try {
       const response = await axios.post(
-        "https://unihack-2025.onrender.com/api/auth/login/",
+        "https://formify-yg3d.onrender.com/api/auth/login/",
         JSON.stringify(form),
         {
           headers: {
@@ -43,7 +43,7 @@ export default function Login() {
       );
 
       if (response.status === 200) {
-        document.cookie = `auth_token=${response.data.token}; path=/`;
+        document.cookie = `auth_token=${response.data.token}; path=/; SameSite=None; Secure`;
         toast.success("Successfully logged in!", {
           duration: 2000,
           position: "top-center",
@@ -110,7 +110,7 @@ export default function Login() {
         loop
         muted
         className="absolute w-full h-full object-cover"
-        // style={{ filter: 'brightness(0.7)' }}
+      // style={{ filter: 'brightness(0.7)' }}
       >
         <source src="/videoplayback.mp4" type="video/mp4" />
       </video>

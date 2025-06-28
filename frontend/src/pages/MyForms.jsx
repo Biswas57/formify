@@ -15,16 +15,13 @@ export default function MyForms() {
   useEffect(() => {
     const fetchForms = async () => {
       try {
-        const response = await fetch(
-          "https://unihack-2025.onrender.com/api/auth/forms/list/",
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Token ${getCookie("auth_token")}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
+        const response = await fetch("https://formify-yg3d.onrender.com/api/auth/forms/list/", {
+          method: "GET",
+          headers: {
+            Authorization: `Token ${getCookie("auth_token")}`,
+            "Content-Type": "application/json",
+          },
+        });
 
         if (!response.ok) {
           throw new Error("Failed to fetch forms");

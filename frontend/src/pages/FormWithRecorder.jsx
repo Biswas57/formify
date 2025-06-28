@@ -21,6 +21,7 @@ function FormWithRecorder() {
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const wsRef = useRef(null);
   const mediaRecorderRef = useRef(null);
+  const finalResultsReceivedRef = useRef(false);
   const streamRef = useRef(null);
   const formRef = useRef(null);
 
@@ -29,7 +30,7 @@ function FormWithRecorder() {
     const fetchForm = async () => {
       try {
         const response = await fetch(
-          `https://unihack-2025.onrender.com/api/auth/forms/${formId}/`,
+          `https://formify-yg3d.onrender.com/api/auth/forms/${formId}/`,
           {
             method: "GET",
             headers: {
@@ -61,7 +62,7 @@ function FormWithRecorder() {
   // WebSocket connection setup
   useEffect(() => {
     const socket = new WebSocket(
-      `wss://unihack-2025.onrender.com/ws/transcription/${formId}/`
+      `wss://formify-yg3d.onrender.com/ws/transcription/${formId}/`
     );
     socket.binaryType = "arraybuffer";
     socket.onopen = () => {
@@ -72,14 +73,22 @@ function FormWithRecorder() {
         const data = JSON.parse(event.data);
         console.log("WebSocket data received:", data);
 
-        if (data.attributes) {
-          setRealtimeAttributes((prev) => ({ ...prev, ...data.attributes }));
-          setFormValues((prev) => ({ ...prev, ...data.attributes }));
+        // If final results have already been received, ignore further messages.
+        if (finalResultsReceivedRef.current) {
+          console.log("Final results already processed. Ignoring message.");
+          return;
         }
 
+        // Check if this is the final result.
         if (data.final_results) {
           console.log("Received final verified results:", data.attributes);
           setRealtimeAttributes(data.attributes);
+          setFormValues((prev) => ({ ...prev, ...data.attributes }));
+          // Set the flag so that future messages are ignored.
+          finalResultsReceivedRef.current = true;
+        } else if (data.attributes) {
+          // Process intermediate messages.
+          setRealtimeAttributes((prev) => ({ ...prev, ...data.attributes }));
           setFormValues((prev) => ({ ...prev, ...data.attributes }));
         }
       } catch (err) {
@@ -101,9 +110,16 @@ function FormWithRecorder() {
   // Recording functions
   const startRecording = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          channelCount: 1,
+          sampleRate: 16000,
+          echoCancellation: true,
+          noiseSuppression: true
+        }
+      });
       streamRef.current = stream;
-      const options = { mimeType: "audio/webm" };
+      const options = { mimeType: "audio/webm; codecs=opus" };
       const recorder = new MediaRecorder(stream, options);
       mediaRecorderRef.current = recorder;
       recorder.ondataavailable = async (event) => {
@@ -118,7 +134,7 @@ function FormWithRecorder() {
           console.log(`Sent ${arrayBuffer.byteLength} bytes`);
         }
       };
-      recorder.start(500);
+      recorder.start(1000);
       setIsRecording(true);
     } catch (err) {
       console.error("Error starting recording:", err);

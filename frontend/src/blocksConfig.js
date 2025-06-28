@@ -13,7 +13,7 @@ export const blocksConfig = {
   },
   Medical: {
     label: "Medical",
-    fields: ["Allergies", "Current Medications", "Medical History"],
+    fields: ["Symptoms", "Duration", "Possible Causes", "Allergies", "Current Medications", "Medical History"],
   },
   Education: {
     label: "Education",
@@ -36,5 +36,9 @@ export const blocksConfig = {
       "Annual Income",
       "Debt Service Coverage Ratio",
     ],
+  },
+  ClassNotes: {
+    label: "Class Notes",
+    fields: ["Class", "Topic", "Notes"],
   },
 };

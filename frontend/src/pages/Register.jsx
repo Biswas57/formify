@@ -113,7 +113,7 @@ export default function Register() {
 
     try {
       const response = await axios.post(
-        "https://unihack-2025.onrender.com/api/auth/register/",
+        "https://formify-yg3d.onrender.com/api/auth/register/",
         JSON.stringify({
           email: form.email,
           username: form.fullName,
@@ -127,7 +127,7 @@ export default function Register() {
       );
 
       if (response.status === 201) {
-        document.cookie = `auth_token=${response.data.token}; path=/`;
+        document.cookie = `auth_token=${response.data.token}; path=/; SameSite=None; Secure`;
         toast.success("Successfully registered!", {
           duration: 2000,
           position: "top-center",
@@ -360,7 +360,7 @@ export default function Register() {
         loop
         muted
         className="absolute w-full h-full object-cover"
-        // style={{ filter: 'brightness(0.7)' }}
+      // style={{ filter: 'brightness(0.7)' }}
       >
         <source src="/videoplayback.mp4" type="video/mp4" />
       </video>
