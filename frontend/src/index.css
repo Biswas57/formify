@@ -1,1 +1,581 @@
 @import "tailwindcss";
+
+/* Smooth scroll behavior for the entire page */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom CSS Variables for consistent theming */
+:root {
+  --primary-blue: #2563eb;
+  --primary-blue-dark: #1d4ed8;
+  --secondary-gray: #f8fafc;
+  --text-dark: #0f172a;
+  --text-gray: #64748b;
+}
+
+/* Override default border color for subtle borders */
+.border-b {
+  border-bottom: 1px solid #e2e8f0;
+}
+
+/* Custom Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideRight {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideLeft {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes bounceIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+  70% {
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pulseWave {
+  0%, 100% {
+    width: 20%;
+  }
+  50% {
+    width: 80%;
+  }
+}
+
+/* Signature Animation */
+@keyframes signature-text-write {
+  0% {
+    width: 0;
+  }
+  100% {
+    width: 100%;
+  }
+}
+
+
+
+@keyframes signature-container-fade {
+  0% {
+    opacity: 0;
+    transform: translateX(20px) translateY(10px);
+  }
+  100% {
+    opacity: 0.7;
+    transform: translateX(0) translateY(0);
+  }
+}
+
+/* Floating animations for industry papers */
+@keyframes float-1 {
+  0%, 100% {
+    transform: rotate(-15deg) translateY(0px);
+  }
+  50% {
+    transform: rotate(-15deg) translateY(-10px);
+  }
+}
+
+@keyframes float-2 {
+  0%, 100% {
+    transform: rotate(-5deg) translateY(0px);
+  }
+  50% {
+    transform: rotate(-5deg) translateY(-8px);
+  }
+}
+
+@keyframes float-3 {
+  0%, 100% {
+    transform: rotate(5deg) translateY(0px);
+  }
+  50% {
+    transform: rotate(5deg) translateY(-12px);
+  }
+}
+
+@keyframes float-4 {
+  0%, 100% {
+    transform: rotate(15deg) translateY(0px);
+  }
+  50% {
+    transform: rotate(15deg) translateY(-15px);
+  }
+}
+
+/* Typing Animation with Cursor Movement */
+@keyframes typing-1 {
+  0% { width: 0; }
+  15% { width: 0; }
+  25% { width: 100%; }
+  100% { width: 100%; }
+}
+
+@keyframes typing-2 {
+  0% { width: 0; }
+  25% { width: 0; }
+  35% { width: 100%; }
+  100% { width: 100%; }
+}
+
+@keyframes typing-3 {
+  0% { width: 0; }
+  35% { width: 0; }
+  45% { width: 100%; }
+  100% { width: 100%; }
+}
+
+@keyframes typing-4 {
+  0% { width: 0; }
+  45% { width: 0; }
+  60% { width: 100%; }
+  100% { width: 100%; }
+}
+
+@keyframes typing-5 {
+  0% { width: 0; }
+  60% { width: 0; }
+  75% { width: 100%; }
+  100% { width: 100%; }
+}
+
+/* Cursor animations that move with typing */
+@keyframes cursor-1 {
+  0% {
+    opacity: 0;
+    left: calc(12px + 0ch);
+  }
+  15% {
+    opacity: 1;
+    left: calc(12px + 0ch);
+  }
+  25% {
+    opacity: 1;
+    left: calc(12px + 10ch);
+  }
+  30% {
+    opacity: 0;
+    left: calc(12px + 10ch);
+  }
+  100% {
+    opacity: 0;
+    left: calc(12px + 10ch);
+  }
+}
+
+@keyframes cursor-2 {
+  0% {
+    opacity: 0;
+    left: calc(12px + 0ch);
+  }
+  25% {
+    opacity: 1;
+    left: calc(12px + 0ch);
+  }
+  35% {
+    opacity: 1;
+    left: calc(12px + 23ch);
+  }
+  40% {
+    opacity: 0;
+    left: calc(12px + 23ch);
+  }
+  100% {
+    opacity: 0;
+    left: calc(12px + 23ch);
+  }
+}
+
+@keyframes cursor-3 {
+  0% {
+    opacity: 0;
+    left: calc(12px + 0ch);
+  }
+  35% {
+    opacity: 1;
+    left: calc(12px + 0ch);
+  }
+  45% {
+    opacity: 1;
+    left: calc(12px + 14ch);
+  }
+  50% {
+    opacity: 0;
+    left: calc(12px + 14ch);
+  }
+  100% {
+    opacity: 0;
+    left: calc(12px + 14ch);
+  }
+}
+
+@keyframes cursor-4 {
+  0% {
+    opacity: 0;
+    left: calc(12px + 0ch);
+  }
+  45% {
+    opacity: 1;
+    left: calc(12px + 0ch);
+  }
+  60% {
+    opacity: 1;
+    left: calc(12px + 27ch);
+  }
+  65% {
+    opacity: 0;
+    left: calc(12px + 27ch);
+  }
+  100% {
+    opacity: 0;
+    left: calc(12px + 27ch);
+  }
+}
+
+@keyframes cursor-5 {
+  0% {
+    opacity: 0;
+    left: calc(12px + 0ch);
+  }
+  60% {
+    opacity: 1;
+    left: calc(12px + 0ch);
+  }
+  75% {
+    opacity: 1;
+    left: calc(12px + 22ch);
+  }
+  80% {
+    opacity: 0;
+    left: calc(12px + 22ch);
+  }
+  100% {
+    opacity: 0;
+    left: calc(12px + 22ch);
+  }
+}
+
+/* Animation Classes */
+.animate-fade-in {
+  animation: fadeIn 0.8s ease-out forwards;
+}
+
+.animate-fade-in-delay {
+  animation: fadeIn 0.8s ease-out 0.2s forwards;
+  opacity: 0;
+}
+
+.animate-fade-up {
+  animation: fadeUp 0.8s ease-out forwards;
+}
+
+.animate-fade-up-delay {
+  animation: fadeUp 0.8s ease-out 0.2s forwards;
+  opacity: 0;
+}
+
+.animate-fade-up-delay-2 {
+  animation: fadeUp 0.8s ease-out 0.4s forwards;
+  opacity: 0;
+}
+
+.animate-fade-up-delay-3 {
+  animation: fadeUp 0.8s ease-out 0.6s forwards;
+  opacity: 0;
+}
+
+.animate-fade-up-delay-4 {
+  animation: fadeUp 0.8s ease-out 0.8s forwards;
+  opacity: 0;
+}
+
+.animate-slide-down {
+  animation: slideDown 0.6s ease-out forwards;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.8s ease-out forwards;
+}
+
+.animate-slide-up-delay {
+  animation: slideUp 0.8s ease-out 0.2s forwards;
+  opacity: 0;
+}
+
+.animate-slide-up-delay-2 {
+  animation: slideUp 0.8s ease-out 0.4s forwards;
+  opacity: 0;
+}
+
+.animate-slide-up-delay-3 {
+  animation: slideUp 0.8s ease-out 0.6s forwards;
+  opacity: 0;
+}
+
+.animate-slide-up-delay-4 {
+  animation: slideUp 0.8s ease-out 0.8s forwards;
+  opacity: 0;
+}
+
+.animate-slide-up-delay-5 {
+  animation: slideUp 0.8s ease-out 1s forwards;
+  opacity: 0;
+}
+
+.animate-slide-right {
+  animation: slideRight 0.8s ease-out forwards;
+}
+
+.animate-slide-left {
+  animation: slideLeft 0.8s ease-out forwards;
+}
+
+.animate-bounce-in {
+  animation: bounceIn 0.8s ease-out forwards;
+}
+
+.animate-pulse-wave {
+  animation: pulseWave 2s ease-in-out infinite;
+}
+
+.animate-fade-in-up {
+  animation: fadeUp 0.6s ease-out forwards;
+}
+
+.animate-fade-in-up-delay {
+  animation: fadeUp 0.6s ease-out 0.2s forwards;
+  opacity: 0;
+}
+
+.animate-fade-in-up-delay-2 {
+  animation: fadeUp 0.6s ease-out 0.4s forwards;
+  opacity: 0;
+}
+
+.animate-fade-in-delay-2 {
+  animation: fadeIn 0.8s ease-out 0.4s forwards;
+  opacity: 0;
+}
+
+.animate-fade-in-delay-3 {
+  animation: fadeIn 0.8s ease-out 0.6s forwards;
+  opacity: 0;
+}
+
+/* Typing animations */
+.animate-typing-1 {
+  animation: typing-1 8s ease-in-out infinite;
+}
+
+.animate-typing-2 {
+  animation: typing-2 8s ease-in-out infinite;
+}
+
+.animate-typing-3 {
+  animation: typing-3 8s ease-in-out infinite;
+}
+
+.animate-typing-4 {
+  animation: typing-4 8s ease-in-out infinite;
+}
+
+.animate-typing-5 {
+  animation: typing-5 8s ease-in-out infinite;
+}
+
+/* Cursor animations with proper movement */
+.animate-cursor-1 {
+  animation: cursor-1 8s ease-in-out infinite;
+}
+
+.animate-cursor-2 {
+  animation: cursor-2 8s ease-in-out infinite;
+}
+
+.animate-cursor-3 {
+  animation: cursor-3 8s ease-in-out infinite;
+}
+
+.animate-cursor-4 {
+  animation: cursor-4 8s ease-in-out infinite;
+}
+
+.animate-cursor-5 {
+  animation: cursor-5 8s ease-in-out infinite;
+}
+
+/* Signature animation classes */
+.signature-container {
+  animation: signature-container-fade 0.8s ease-out 1.2s forwards;
+  opacity: 0;
+  transform: rotate(-2deg);
+}
+
+.signature-text-wrapper {
+  overflow: hidden;
+  white-space: nowrap;
+  animation: signature-text-write 2s ease-out 1.7s forwards;
+  width: 0;
+}
+
+.signature-text {
+  font-family: 'Brush Script MT', 'Lucida Handwriting', 'Dancing Script', cursive, serif;
+  font-size: 28px;
+  color: #2563eb;
+  font-weight: 400;
+  font-style: italic;
+  display: inline-block;
+  transform: rotate(-3deg);
+  letter-spacing: 1.5px;
+}
+
+
+
+
+
+/* Industry paper hover effects */
+.healthcare-paper:hover {
+  animation-play-state: paused !important;
+  transform: rotate(15deg) translateY(-30px) scale(1.05) !important;
+  z-index: 50 !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+}
+
+.finance-paper:hover {
+  animation-play-state: paused !important;
+  transform: rotate(5deg) translateY(-30px) scale(1.05) !important;
+  z-index: 50 !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+}
+
+.education-paper:hover {
+  animation-play-state: paused !important;
+  transform: rotate(-5deg) translateY(-30px) scale(1.05) !important;
+  z-index: 50 !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+}
+
+.legal-paper:hover {
+  animation-play-state: paused !important;
+  transform: rotate(-15deg) translateY(-30px) scale(1.05) !important;
+  z-index: 50 !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+}
+
+/* Floating animations for static state */
+.legal-paper {
+  animation: float-1 3s ease-in-out infinite;
+  transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+}
+
+.education-paper {
+  animation: float-2 3.5s ease-in-out infinite;
+  transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+}
+
+.finance-paper {
+  animation: float-3 4s ease-in-out infinite;
+  transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+}
+
+.healthcare-paper {
+  animation: float-4 4.5s ease-in-out infinite;
+  transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .healthcare-paper,
+  .finance-paper,
+  .education-paper,
+  .legal-paper {
+    width: 200px !important;
+    height: 280px !important;
+  }
+  
+  .legal-paper {
+    transform: translateX(-80%) rotate(-15deg) !important;
+  }
+  
+  .education-paper {
+    transform: translateX(-40%) rotate(-5deg) !important;
+  }
+  
+  .finance-paper {
+    transform: translateX(0%) rotate(5deg) !important;
+  }
+  
+  .healthcare-paper {
+    transform: translateX(40%) rotate(15deg) !important;
+  }
+}

@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import Register from "./pages/Register";
 import Login from "./pages/Login";
+import HomePage from "./pages/HomePage";
 import FormCreate from "./pages/FormCreate";
 import MyForms from "./pages/MyForms";
 import DashboardLayout from "./components/DashboardLayout";
@@ -10,7 +11,7 @@ import FormWithRecorder from "./pages/FormWithRecorder";
 export default function App() {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/login" replace />} />
+      <Route path="/" element={<HomePage />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       
